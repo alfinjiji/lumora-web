@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local order data and private configuration
+.data/
+.env
+.env.*
+!.env.example
