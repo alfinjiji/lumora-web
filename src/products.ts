@@ -22,7 +22,7 @@ export const products: Product[] = [
       'A soft, golden scent for slowing down. Warm amber meets quiet woods, with a gentle touch of vanilla.',
     price: 899,
     color: '#a36234',
-    backdrop: '#e9ded0',
+    backdrop: '#241c15',
     label: 'The golden one',
   },
   {
@@ -34,7 +34,7 @@ export const products: Product[] = [
       'An invitation to step away from the noise. Fresh bergamot opens into deep cedar and the stillness of a forest floor.',
     price: 999,
     color: '#59634a',
-    backdrop: '#e0e5d8',
+    backdrop: '#1b2019',
     label: 'A breath of calm',
   },
   {
@@ -46,7 +46,7 @@ export const products: Product[] = [
       'Fresh petals, an open window, and a little room to dream. A delicate floral scent with a soft, comforting finish.',
     price: 849,
     color: '#a96f66',
-    backdrop: '#eeded9',
+    backdrop: '#291c1d',
     label: 'Something soft',
   },
   {
@@ -58,7 +58,7 @@ export const products: Product[] = [
       'For the hours that belong to you. Ripe fig and black tea settle into a warm, woody base.',
     price: 1099,
     color: '#4e424b',
-    backdrop: '#dedbdd',
+    backdrop: '#211b24',
     label: 'After the sun sets',
   },
 ]

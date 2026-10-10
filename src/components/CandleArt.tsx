@@ -1,4 +1,5 @@
 import { useId } from 'react'
+import { products } from '../products'
 
 export default function CandleArt({
   color,
@@ -10,6 +11,20 @@ export default function CandleArt({
   className?: string
 }) {
   const id = useId().replace(/:/g, '')
+  const product = products.find((item) => item.name === name)
+  if (product) {
+    return (
+      <img
+        className={className}
+        src={`/images/${product.id}.webp`}
+        alt={`${name} candle in a ribbed glass jar`}
+        width={480}
+        height={530}
+        loading={className.includes('scene') ? 'eager' : 'lazy'}
+        decoding="async"
+      />
+    )
+  }
   return (
     <svg
       className={className}

@@ -183,11 +183,11 @@ export default function App() {
         Skip to content
       </a>
       <div className="announcement">
-        A little light. A moment for yourself. <span>Meet Lumora.</span>
+        A quieter world, one flame at a time. <span>Welcome to Lumora.</span>
       </div>
       <header className="site-header">
         <a className="wordmark" href="#" aria-label="Lumora home">
-          lumora<span>✳</span>
+          lumora<span>✦</span>
         </a>
         <nav
           className={menuOpen ? 'primary-nav is-open' : 'primary-nav'}
@@ -230,23 +230,27 @@ export default function App() {
         <section className="hero" aria-labelledby="hero-title">
           <div className="hero-copy">
             <p className="eyebrow">
-              <span className="tiny-sun">✳</span> A softer kind of everyday
+              <span className="tiny-sun">
+                <Icon name="spark" size={20} />
+              </span>
+              Candles for quieter days
             </p>
             <h1 id="hero-title">
-              A little light.
-              <br />A <em>softer</em> life.
+              Light becomes
+              <br />
+              <em>atmosphere.</em>
             </h1>
             <p className="hero-description">
-              Scent, warmth, and a moment to pause.
+              A gift for someone. A moment for yourself.
               <br />
-              Meet candles that make a space feel like you.
+              Discover fragrance that makes a room feel like home.
             </p>
             <a className="button button-dark" href="#collection">
-              Find your glow <Icon name="arrow" />
+              Explore candles <Icon name="arrow" />
             </a>
             <div className="hero-footnote">
               <span className="small-line" />
-              For quiet mornings & slow evenings.
+              Considered scents. Everyday warmth.
             </div>
           </div>
           <div
@@ -255,12 +259,10 @@ export default function App() {
               { '--scene-color': heroProduct.color } as React.CSSProperties
             }
           >
-            <div className="hero-orbit orbit-one" />
-            <div className="hero-orbit orbit-two" />
             <div className="scene-halo" />
             <div className="scene-shadow" />
             <div className="art-caption caption-top">
-              <span>THE EVERYDAY RITUAL</span>
+              <span>THE ART OF ATMOSPHERE</span>
               <span>01 / {String(mood + 1).padStart(2, '0')}</span>
             </div>
             <Suspense
@@ -275,15 +277,23 @@ export default function App() {
               <CandleScene color={heroProduct.color} name={heroProduct.name} />
             </Suspense>
             <div className="hero-product-label">
-              <span className="eyebrow">Your current mood</span>
+              <span className="eyebrow">
+                In the spotlight · {formatPrice(heroProduct.price)}
+              </span>
               <strong>{heroProduct.name}</strong>
               <span>{heroProduct.notes}</span>
+              <button
+                className="hero-discover"
+                onClick={() => setProduct(heroProduct)}
+              >
+                Discover the scent <Icon name="arrow" size={16} />
+              </button>
             </div>
             <div
               className="mood-picker"
               aria-label="Choose a candle to explore"
             >
-              {products.slice(0, 3).map((item, index) => (
+              {products.map((item, index) => (
                 <button
                   key={item.id}
                   className={mood === index ? 'mood-dot active' : 'mood-dot'}
@@ -325,12 +335,12 @@ export default function App() {
             <div>
               <p className="eyebrow">THE LUMORA COLLECTION</p>
               <h2 id="collection-title">
-                Find your <em>kind of calm.</em>
+                Find your <em>signature glow.</em>
               </h2>
             </div>
             <p>
-              A scent for the moment.
-              <br />A little something, just for you.
+              For thoughtful gifts and everyday escapes.
+              <br />Your next favourite scent starts here.
             </p>
           </div>
           <div className="collection-toolbar">
@@ -398,23 +408,27 @@ export default function App() {
 
         <section className="story" id="story" aria-labelledby="story-title">
           <div className="story-art">
-            <div className="story-sun" />
-            <div className="story-arch" />
-            <div className="story-plinth" />
-            <CandleArt color="#59634a" name="Quiet Forest" />
+            <img
+              className="story-campaign"
+              src="/images/after-dark-story.webp"
+              alt="Illustrative Lumora candles in warm amber light on a dark stone surface"
+              loading="lazy"
+              width="1024"
+              height="1024"
+            />
             <span className="story-art-label">
-              LESS HURRY.
+              AFTER THE SUN SETS.
               <br />
-              MORE HERE.
+              YOUR MOMENT BEGINS.
             </span>
-            <span className="story-art-number">L / 01</span>
+            <span className="story-art-number">The art of slowing down.</span>
           </div>
           <div className="story-copy">
             <p className="eyebrow">THE HEART OF LUMORA</p>
             <h2 id="story-title">
-              Life moves fast.
+              Small flame.
               <br />
-              <em>Let’s slow it down.</em>
+              <em>Entirely different feeling.</em>
             </h2>
             <p>
               Lumora is a celebration of the small things: a familiar room, a
@@ -475,13 +489,16 @@ export default function App() {
         </section>
 
         <section className="quote-section">
-          <span className="quote-symbol">✳</span>
+          <span className="quote-symbol">✦</span>
           <p>
-            Not just a candle.
+            A thoughtful gift.
             <br />
-            <em>A feeling you come home to.</em>
+            <em>A beautiful everyday escape.</em>
           </p>
-          <span className="eyebrow">THAT’S THE LUMORA WAY</span>
+          <span className="eyebrow">FOR THEIR SPACE. FOR YOURS.</span>
+          <a className="button button-dark" href="#collection">
+            Find a little warmth <Icon name="arrow" size={18} />
+          </a>
         </section>
 
         <section
@@ -575,7 +592,7 @@ export default function App() {
       <footer className="site-footer">
         <div className="footer-top">
           <a className="wordmark" href="#">
-            lumora<span>✳</span>
+            lumora<span>✦</span>
           </a>
           <p>
             Find your glow.

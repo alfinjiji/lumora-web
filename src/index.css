@@ -1,18 +1,19 @@
 :root {
   font-family: Arial, Helvetica, sans-serif;
-  color: #342c25;
-  background: #faf8f3;
+  color: #f6ead9;
+  background: #100e0c;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  --paper: #faf8f3;
-  --ink: #342c25;
-  --muted: #807469;
-  --rust: #9e5e40;
-  --line: #dfd9cd;
+  --paper: #100e0c;
+  --ink: #f6ead9;
+  --muted: #b9aa98;
+  --rust: #e0b77d;
+  --line: #ffffff21;
   --serif: Georgia, 'Times New Roman', serif;
   font-size: 15px;
+  color-scheme: dark;
 }
 * {
   box-sizing: border-box;
@@ -76,11 +77,11 @@ svg {
   display: block;
 }
 ::selection {
-  background: #dfbba6;
-  color: #342c25;
+  background: #a87642;
+  color: #f6ead9;
 }
 :focus-visible {
-  outline: 2px solid #9e5e40;
+  outline: 2px solid #e0b77d;
   outline-offset: 5px;
 }
 button:focus-visible {
@@ -102,8 +103,8 @@ section[id] {
   top: -60px;
   left: 16px;
   padding: 14px;
-  background: var(--ink);
-  color: white;
+  background: var(--rust);
+  color: var(--paper);
   z-index: 100;
 }
 .skip-link:focus {

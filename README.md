@@ -72,7 +72,7 @@ The newsletter form is a preview only; it does not send or store email addresses
 - `src/App.tsx`: brand sections, catalog filters, dialogs, and shopping bag.
 - `src/products.ts`: shared sample catalog and INR formatting.
 - `src/components/CandleScene.tsx`: WebGL model and animation.
-- `src/components/CandleArt.tsx`: local product illustrations and fallback.
+- `src/components/CandleArt.tsx`: static 3D product renders and the WebGL fallback.
 - `src/components/Checkout.tsx`: delivery form, SDK handoff, and confirmation retries.
 - `server/store.mjs`: order calculation, signature verification, capture, and webhooks.
 - `server/index.mjs`: HTTP API and production static server.
@@ -91,3 +91,9 @@ npm run dev -- --host 0.0.0.0 --port 5173 --strictPort
 Installation needs `registry.npmjs.org`. Payment integration needs `api.razorpay.com`; the customer browser loads `checkout.razorpay.com`. Those domain additions and runtime-variable requirements are saved in the environment draft. Saving a draft does not apply networking, inject credentials, or publish the environment.
 
 Restart frontend/backend processes in new tasks. Readiness checks are the hero, product filters, cart, and `/api/health`; a running port alone is insufficient. Missing Razorpay credentials leave the portfolio and cart available while checkout remains disabled.
+
+## After Dark design
+
+The approved cinematic direction uses charcoal surfaces, warm amber accents, a ribbed-glass Three.js candle, gold label details, and a dark product stage. The hero responds gently to the pointer; reduced-motion preferences produce a static scene. Rendering pauses offscreen and when the document is hidden. A local image remains visible when WebGL is unavailable.
+
+Product cards reuse static WebP renders of the same model to avoid extra WebGL contexts. `public/images/after-dark-story.webp` is AI-generated illustrative campaign imagery, not a photograph of confirmed inventory. All shapes, packaging, names, and prices are samples until the actual products are supplied.

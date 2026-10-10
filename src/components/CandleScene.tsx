@@ -1,14 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
 import CandleArt from './CandleArt'
 
-export default function CandleScene({
-  color,
-  name,
-}: {
-  color: string
-  name: string
-}) {
+export default function CandleScene({ color, name }: { color: string; name: string }) {
   const host = useRef<HTMLDivElement>(null)
   const [ready, setReady] = useState(false)
 
@@ -27,129 +22,176 @@ export default function CandleScene({
     } catch {
       return
     }
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75))
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, window.innerWidth < 760 ? 1.25 : 1.5))
     renderer.setClearColor(0x000000, 0)
     renderer.outputColorSpace = THREE.SRGBColorSpace
     renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 1
-    const contextLost = () => setReady(false)
-    const contextRestored = () => setReady(true)
-    renderer.domElement.addEventListener('webglcontextlost', contextLost)
-    renderer.domElement.addEventListener(
-      'webglcontextrestored',
-      contextRestored,
-    )
+    renderer.toneMappingExposure = 1.15
+    renderer.shadowMap.enabled = true
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap
+    renderer.shadowMap.autoUpdate = false
+    renderer.shadowMap.needsUpdate = true
     element.appendChild(renderer.domElement)
     renderer.domElement.setAttribute('aria-hidden', 'true')
 
     const scene = new THREE.Scene()
-    const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100)
-    camera.position.set(0, 1.6, 6.8)
-    camera.lookAt(0, 0.1, 0)
-    scene.add(new THREE.HemisphereLight(0xfff5e3, 0x6b513e, 2))
-    const light = new THREE.DirectionalLight(0xfff3dd, 3)
-    light.position.set(-3, 4, 4)
-    scene.add(light)
-    const rim = new THREE.DirectionalLight(0xffffff, 1.5)
+    const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 50)
+    camera.position.set(0, 2.15, 7.3)
+    camera.lookAt(0, 0.04, 0)
+    const room = new RoomEnvironment()
+    const generator = new THREE.PMREMGenerator(renderer)
+    let environment = generator.fromScene(room, 0.04)
+    scene.environment = environment.texture
+    scene.environmentIntensity = 0.55
+    room.dispose()
+    generator.dispose()
+
+    scene.add(new THREE.HemisphereLight(0xffddb1, 0x100a06, 0.35))
+    const key = new THREE.DirectionalLight(0xffe6c3, 1.8)
+    key.position.set(-3, 4, 4)
+    key.castShadow = true
+    key.shadow.mapSize.set(512, 512)
+    key.shadow.camera.left = -3
+    key.shadow.camera.right = 3
+    key.shadow.camera.top = 3
+    key.shadow.camera.bottom = -3
+    key.shadow.normalBias = 0.04
+    scene.add(key)
+    const rim = new THREE.DirectionalLight(0xffbb70, 2.6)
     rim.position.set(3, 2, -2)
     scene.add(rim)
+    const front = new THREE.DirectionalLight(0xfff4de, 0.6)
+    front.position.set(0, 0, 5)
+    scene.add(front)
+
     const candle = new THREE.Group()
     scene.add(candle)
     const points = [
-      new THREE.Vector2(0.82, -1.04),
-      new THREE.Vector2(0.97, -1.02),
-      new THREE.Vector2(1, -0.93),
-      new THREE.Vector2(1, 0.86),
-      new THREE.Vector2(0.98, 0.92),
-      new THREE.Vector2(0.92, 0.92),
-      new THREE.Vector2(0.92, -0.91),
-      new THREE.Vector2(0, -0.91),
+      new THREE.Vector2(0.83, -1.04), new THREE.Vector2(0.98, -1.01),
+      new THREE.Vector2(1, -0.93), new THREE.Vector2(1, 0.85),
+      new THREE.Vector2(0.99, 0.92), new THREE.Vector2(0.92, 0.92),
+      new THREE.Vector2(0.92, -0.91), new THREE.Vector2(0, -0.91),
     ]
-    const glass = new THREE.Mesh(
-      new THREE.LatheGeometry(points, 96),
-      new THREE.MeshPhysicalMaterial({
-        color,
-        roughness: 0.19,
-        metalness: 0.08,
-        clearcoat: 1,
-        clearcoatRoughness: 0.08,
-      }),
-    )
+    const glassGeometry = new THREE.LatheGeometry(points, 168)
+    const vertices = glassGeometry.attributes.position
+    for (let i = 0; i < vertices.count; i++) {
+      const x = vertices.getX(i), z = vertices.getZ(i)
+      const radius = Math.hypot(x, z)
+      if (radius > 0.95) {
+        const rib = 1 + Math.cos(Math.atan2(z, x) * 28) * 0.025
+        vertices.setXYZ(i, x * rib, vertices.getY(i), z * rib)
+      }
+    }
+    glassGeometry.computeVertexNormals()
+    const glass = new THREE.Mesh(glassGeometry, new THREE.MeshPhysicalMaterial({
+      color: new THREE.Color(color).multiplyScalar(0.48), roughness: 0.19, metalness: 0.5, clearcoat: 1,
+      clearcoatRoughness: 0.06, envMapIntensity: 0.8,
+    }))
+    glass.castShadow = true
     candle.add(glass)
-    const wax = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.905, 0.905, 1.66, 64),
-      new THREE.MeshStandardMaterial({ color: '#eee1c7', roughness: 0.85 }),
-    )
-    wax.position.y = -0.03
+    const wax = new THREE.Mesh(new THREE.CylinderGeometry(0.905, 0.905, 1.58, 64),
+      new THREE.MeshStandardMaterial({ color: '#dcc6a3', roughness: 0.8 }))
+    wax.position.y = -0.07
     candle.add(wax)
-    const wick = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.014, 0.022, 0.16, 12),
-      new THREE.MeshStandardMaterial({ color: '#38291b' }),
-    )
-    wick.position.y = 0.88
+    const gold = new THREE.MeshStandardMaterial({ color: '#d2a15b', metalness: 0.85, roughness: 0.22 })
+    for (const y of [0.9, -0.98]) {
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.995, 0.015, 8, 128), gold)
+      ring.rotation.x = Math.PI / 2
+      ring.position.y = y
+      candle.add(ring)
+    }
+    const wick = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.024, 0.16, 12),
+      new THREE.MeshStandardMaterial({ color: '#24160c' }))
+    wick.position.y = 0.79
     candle.add(wick)
-    const flamePoints = [
-      new THREE.Vector2(0, 0),
-      new THREE.Vector2(0.065, 0.04),
-      new THREE.Vector2(0.078, 0.12),
-      new THREE.Vector2(0.04, 0.23),
-      new THREE.Vector2(0, 0.38),
-    ]
-    const flame = new THREE.Mesh(
-      new THREE.LatheGeometry(flamePoints, 24),
-      new THREE.MeshBasicMaterial({ color: '#ffe0a1' }),
-    )
-    flame.position.y = 0.94
+    const flamePoints = [new THREE.Vector2(0, 0), new THREE.Vector2(0.061, 0.035),
+      new THREE.Vector2(0.075, 0.115), new THREE.Vector2(0.036, 0.24), new THREE.Vector2(0, 0.46)]
+    const flame = new THREE.Mesh(new THREE.LatheGeometry(flamePoints, 24),
+      new THREE.MeshBasicMaterial({ color: '#ffbf58', toneMapped: false }))
+    flame.position.y = 0.85
     candle.add(flame)
-    const glow = new THREE.PointLight(0xffae46, 1.8, 3)
-    glow.position.set(0, 1.12, 0.1)
+    const innerFlame = new THREE.Mesh(new THREE.LatheGeometry(flamePoints, 16),
+      new THREE.MeshBasicMaterial({ color: '#fff5cb', toneMapped: false }))
+    innerFlame.scale.set(0.55, 0.62, 0.55)
+    innerFlame.position.set(0, 0.858, 0.038)
+    candle.add(innerFlame)
+    const glow = new THREE.PointLight(0xffa43e, 5, 4)
+    glow.position.set(0, 1.1, 0.12)
     candle.add(glow)
+
+    const glowCanvas = document.createElement('canvas')
+    glowCanvas.width = glowCanvas.height = 128
+    const glowContext = glowCanvas.getContext('2d')!
+    const gradient = glowContext.createRadialGradient(64, 64, 0, 64, 64, 64)
+    gradient.addColorStop(0, '#ffcb8b70')
+    gradient.addColorStop(0.2, '#ffa55228')
+    gradient.addColorStop(1, '#ff9d4400')
+    glowContext.fillStyle = gradient
+    glowContext.fillRect(0, 0, 128, 128)
+    const glowTexture = new THREE.CanvasTexture(glowCanvas)
+    const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture,
+      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }))
+    halo.position.set(0, 1.06, 0)
+    halo.scale.set(1.6, 1.6, 1)
+    candle.add(halo)
+
     const labelCanvas = document.createElement('canvas')
     labelCanvas.width = 1024
     labelCanvas.height = 512
     const context = labelCanvas.getContext('2d')!
-    context.fillStyle = '#f8f3e9'
+    context.fillStyle = '#181310'
     context.fillRect(0, 0, 1024, 512)
-    context.fillStyle = '#453c31'
+    context.strokeStyle = '#b88b51'
+    context.lineWidth = 2
+    context.strokeRect(24, 24, 976, 464)
+    context.fillStyle = '#edcd98'
     context.textAlign = 'center'
-    context.font = '96px Georgia'
-    context.fillText('L U M O R A', 512, 170)
-    context.fillStyle = '#bcae98'
-    context.fillRect(175, 225, 674, 2)
-    context.fillStyle = '#605344'
-    context.font = '34px Arial'
-    context.fillText(name.toUpperCase(), 512, 318)
-    context.font = '22px Arial'
-    context.fillText('S C E N T E D   C A N D L E', 512, 403)
-    const texture = new THREE.CanvasTexture(labelCanvas)
-    texture.colorSpace = THREE.SRGBColorSpace
-    const label = new THREE.Mesh(
-      new THREE.CylinderGeometry(1.008, 1.008, 0.75, 48, 1, true, -0.66, 1.32),
-      new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide }),
-    )
-    label.position.y = -0.12
+    context.font = '118px Georgia'
+    context.fillText('lumora', 512, 192)
+    context.fillStyle = '#9a784e'
+    context.fillRect(350, 246, 324, 2)
+    context.fillStyle = '#dac4a1'
+    context.font = '32px Arial'
+    context.fillText(name.toUpperCase(), 512, 329)
+    context.font = '20px Arial'
+    context.fillText('S C E N T E D   C A N D L E', 512, 407)
+    const labelTexture = new THREE.CanvasTexture(labelCanvas)
+    labelTexture.colorSpace = THREE.SRGBColorSpace
+    const label = new THREE.Mesh(new THREE.CylinderGeometry(1.035, 1.035, 0.69, 48, 1, true, -0.57, 1.14),
+      new THREE.MeshBasicMaterial({ map: labelTexture, side: THREE.DoubleSide }))
+    label.position.y = -0.14
     candle.add(label)
-    candle.rotation.z = -0.065
 
-    let frame = 0
-    let targetX = 0
-    let targetY = 0
-    let visible = true
+    const stage = new THREE.Mesh(new THREE.CylinderGeometry(1.53, 1.6, 0.18, 96),
+      new THREE.MeshStandardMaterial({ color: '#050403', metalness: 0, roughness: 0.88, envMapIntensity: 0 }))
+    stage.position.y = -1.16
+    stage.receiveShadow = true
+    scene.add(stage)
+    const stageRim = new THREE.Mesh(new THREE.TorusGeometry(1.55, 0.009, 6, 96), gold)
+    stageRim.rotation.x = Math.PI / 2
+    stageRim.position.y = -1.15
+    scene.add(stageRim)
+    const floor = new THREE.Mesh(new THREE.CircleGeometry(3.2, 64), new THREE.ShadowMaterial({ opacity: 0.4 }))
+    floor.rotation.x = -Math.PI / 2
+    floor.position.y = -1.26
+    floor.receiveShadow = true
+    scene.add(floor)
+
+    let frame = 0, targetX = 0, targetY = 0, previousRender = -Infinity
+    let visible = true, lost = false
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
     const render = (time: number) => {
-      if (visible && !document.hidden) {
+      if (visible && !document.hidden && !lost && (motion.matches || time - previousRender >= 1000 / 30)) {
+        previousRender = time
         const t = time * 0.001
         if (!motion.matches) {
-          candle.rotation.y += (targetX * 0.28 - candle.rotation.y) * 0.04
-          candle.rotation.x += (targetY * 0.09 - candle.rotation.x) * 0.04
-          candle.position.y = Math.sin(t * 0.8) * 0.065
-          flame.scale.set(
-            1 + Math.sin(t * 7) * 0.06,
-            1 + Math.sin(t * 5) * 0.08,
-            1,
-          )
-          flame.rotation.z = Math.sin(t * 3) * 0.09
-          glow.intensity = 1.8 + Math.sin(t * 5) * 0.2
+          candle.rotation.y += (targetX * 0.55 - candle.rotation.y) * 0.045
+          candle.rotation.x += (targetY * 0.08 - candle.rotation.x) * 0.045
+          candle.position.y = Math.sin(t * 0.65) * 0.015
+          flame.scale.set(1 + Math.sin(t * 7) * 0.045, 1 + Math.sin(t * 5) * 0.06, 1)
+          flame.rotation.z = Math.sin(t * 3) * 0.075
+          innerFlame.rotation.z = flame.rotation.z
+          glow.intensity = 5 + Math.sin(t * 5) * 0.35
         }
         renderer.render(scene, camera)
       }
@@ -157,28 +199,53 @@ export default function CandleScene({
     }
     const resize = () => {
       const { width, height } = element.getBoundingClientRect()
+      if (!width || !height) return
       renderer.setSize(width, height)
-      camera.aspect = width / Math.max(height, 1)
+      camera.aspect = width / height
+      camera.position.z = camera.aspect < 0.85 ? 8.8 : 7.3
       camera.updateProjectionMatrix()
-      if (motion.matches) renderer.render(scene, camera)
+      if (motion.matches && !lost) renderer.render(scene, camera)
     }
     const pointer = (event: PointerEvent) => {
       const rect = element.getBoundingClientRect()
       targetX = (event.clientX - rect.left) / rect.width - 0.5
       targetY = (event.clientY - rect.top) / rect.height - 0.5
     }
-    const resetPointer = () => {
-      targetX = 0
-      targetY = 0
-    }
+    const resetPointer = () => { targetX = 0; targetY = 0 }
     const changeMotion = () => {
       cancelAnimationFrame(frame)
+      previousRender = -Infinity
+      candle.rotation.set(0, 0, 0)
+      candle.position.y = 0
       render(0)
     }
+    const contextLost = (event: Event) => {
+      event.preventDefault()
+      lost = true
+      environment.dispose()
+      setReady(false)
+    }
+    const contextRestored = () => {
+      const restoredRoom = new RoomEnvironment()
+      const restoredGenerator = new THREE.PMREMGenerator(renderer)
+      environment = restoredGenerator.fromScene(restoredRoom, 0.04)
+      scene.environment = environment.texture
+      restoredRoom.dispose()
+      restoredGenerator.dispose()
+      renderer.shadowMap.needsUpdate = true
+      lost = false
+      previousRender = -Infinity
+      setReady(true)
+      resize()
+      if (motion.matches) render(0)
+    }
+    renderer.domElement.addEventListener('webglcontextlost', contextLost)
+    renderer.domElement.addEventListener('webglcontextrestored', contextRestored)
     const resizeObserver = new ResizeObserver(resize)
     resizeObserver.observe(element)
     const intersectionObserver = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting
+      if (visible && motion.matches && !lost) renderer.render(scene, camera)
     })
     intersectionObserver.observe(element)
     element.addEventListener('pointermove', pointer)
@@ -195,37 +262,31 @@ export default function CandleScene({
       element.removeEventListener('pointermove', pointer)
       element.removeEventListener('pointerleave', resetPointer)
       motion.removeEventListener('change', changeMotion)
+      const materials = new Set<THREE.Material>()
       scene.traverse((object) => {
         if (object instanceof THREE.Mesh) {
           object.geometry.dispose()
-          const materials = Array.isArray(object.material)
-            ? object.material
-            : [object.material]
-          materials.forEach((material) => material.dispose())
-        }
+          const meshMaterials = Array.isArray(object.material) ? object.material : [object.material]
+          meshMaterials.forEach((material) => materials.add(material))
+        } else if (object instanceof THREE.Sprite) materials.add(object.material)
       })
-      texture.dispose()
+      materials.forEach((material) => material.dispose())
+      labelTexture.dispose()
+      glowTexture.dispose()
+      environment.dispose()
+      key.shadow.dispose()
       renderer.domElement.removeEventListener('webglcontextlost', contextLost)
-      renderer.domElement.removeEventListener(
-        'webglcontextrestored',
-        contextRestored,
-      )
+      renderer.domElement.removeEventListener('webglcontextrestored', contextRestored)
       renderer.dispose()
-      renderer.forceContextLoss()
+      if (!lost) renderer.forceContextLoss()
       renderer.domElement.remove()
     }
   }, [color, name])
 
   return (
-    <div
-      className="candle-scene"
-      role="img"
-      aria-label={`Animated 3D ${name} candle. Move your pointer to explore.`}
-    >
+    <div className="candle-scene" role="img" aria-label={`Animated 3D ${name} candle. Move your pointer to explore.`}>
       <div className="webgl-host" ref={host} />
-      {!ready && (
-        <CandleArt className="scene-fallback" color={color} name={name} />
-      )}
+      {!ready && <CandleArt className="scene-fallback" color={color} name={name} />}
     </div>
   )
 }
