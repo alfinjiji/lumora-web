@@ -4,8 +4,8 @@ A responsive candle portfolio and storefront built with React, TypeScript, Vite,
 
 ## Features
 
-- A real WebGL candle with pointer parallax, floating motion, and an animated flame.
-- Lazy-loaded 3D, capped pixel density, off-screen rendering pause, reduced-motion support, and an SVG fallback.
+- A pinned, three-chapter WebGL story: native scrolling moves and rotates the candle, changes the camera distance, and reveals its glass details.
+- Lazy-loaded 3D, capped pixel density, off-screen rendering pause, reduced-motion support, and a local WebP fallback.
 - Scent filters, product details, responsive navigation, brand story, candle care, and FAQ.
 - A browser-persistent shopping bag with quantity controls and INR totals.
 - A delivery form and Razorpay checkout with server-calculated amounts.
@@ -94,6 +94,14 @@ Restart frontend/backend processes in new tasks. Readiness checks are the hero, 
 
 ## After Dark design
 
-The approved cinematic direction uses charcoal surfaces, warm amber accents, a ribbed-glass Three.js candle, gold label details, and a dark product stage. The hero responds gently to the pointer; reduced-motion preferences produce a static scene. Rendering pauses offscreen and when the document is hidden. A local image remains visible when WebGL is unavailable.
+The entire page uses the After Dark direction: a full-screen candle journey, sculpted product cards, a cinematic gifting section, a care guide, redesigned FAQs, a centered signup area, a large wordmark footer, and matching product/cart/checkout dialogs. Scroll position changes the actual Three.js composition and camera; the canvas stays mounted across the three chapters. Native scrolling is retained, with no wheel interception or forced transitions.
+
+On supported browsers, product cards enter with perspective depth and the gifting image moves subtly with the scroll. Pointer movement tilts product cards. Reduced-motion preferences unpin the scene and retain static chapter illustrations. Rendering pauses offscreen and when the document is hidden; pixel count and frame rate are capped. A local image remains visible when WebGL is unavailable.
 
 Product cards reuse static WebP renders of the same model to avoid extra WebGL contexts. `public/images/after-dark-story.webp` is AI-generated illustrative campaign imagery, not a photograph of confirmed inventory. All shapes, packaging, names, and prices are samples until the actual products are supplied.
+
+## Viewing a live preview
+
+For a live preview on your own computer, clone the repository, install Node.js 24, run `npm ci`, then `npm run dev`. Open the local address printed by Vite in that computer’s browser. Keep the command running while viewing; changes reload automatically.
+
+A localhost server in the cloud environment is not a public website. A Codex browser-panel request is not proof of port forwarding or browser access; the current task reports no preview capability. A shareable Internet preview requires a deployment or supported cloud port forwarding. Publishing the environment configuration does not deploy the website.

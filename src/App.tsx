@@ -89,6 +89,27 @@ function readCart(): CartItem[] {
   }
 }
 
+function tiltProduct(event: React.PointerEvent<HTMLElement>) {
+  if (
+    event.pointerType !== 'mouse' ||
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  )
+    return
+  const rect = event.currentTarget.getBoundingClientRect()
+  event.currentTarget.style.setProperty(
+    '--tilt-x',
+    `${((event.clientY - rect.top) / rect.height - 0.5) * -5}deg`,
+  )
+  event.currentTarget.style.setProperty(
+    '--tilt-y',
+    `${((event.clientX - rect.left) / rect.width - 0.5) * 7}deg`,
+  )
+}
+function resetTilt(event: React.PointerEvent<HTMLElement>) {
+  event.currentTarget.style.setProperty('--tilt-x', '0deg')
+  event.currentTarget.style.setProperty('--tilt-y', '0deg')
+}
+
 export default function App() {
   const [mood, setMood] = useState(0)
   const [filter, setFilter] = useState<Mood | 'all'>('all')
@@ -182,9 +203,6 @@ export default function App() {
       <a className="skip-link" href="#main">
         Skip to content
       </a>
-      <div className="announcement">
-        A quieter world, one flame at a time. <span>Welcome to Lumora.</span>
-      </div>
       <header className="site-header">
         <a className="wordmark" href="#" aria-label="Lumora home">
           lumora<span>✦</span>
@@ -198,10 +216,10 @@ export default function App() {
             The collection
           </a>
           <a href="#story" onClick={navigate}>
-            Our story
+            Our world
           </a>
-          <a href="#ritual" onClick={navigate}>
-            The ritual
+          <a href="#gifting" onClick={navigate}>
+            The art of gifting
           </a>
         </nav>
         <div className="header-actions">
@@ -225,125 +243,197 @@ export default function App() {
           </button>
         </div>
       </header>
-
       <main id="main">
-        <section className="hero" aria-labelledby="hero-title">
-          <div className="hero-copy">
-            <p className="eyebrow">
-              <span className="tiny-sun">
-                <Icon name="spark" size={20} />
-              </span>
-              Candles for quieter days
-            </p>
-            <h1 id="hero-title">
-              Light becomes
-              <br />
-              <em>atmosphere.</em>
-            </h1>
-            <p className="hero-description">
-              A gift for someone. A moment for yourself.
-              <br />
-              Discover fragrance that makes a room feel like home.
-            </p>
-            <a className="button button-dark" href="#collection">
-              Explore candles <Icon name="arrow" />
-            </a>
-            <div className="hero-footnote">
-              <span className="small-line" />
-              Considered scents. Everyday warmth.
-            </div>
-          </div>
-          <div
-            className="hero-art"
-            style={
-              { '--scene-color': heroProduct.color } as React.CSSProperties
-            }
-          >
-            <div className="scene-halo" />
-            <div className="scene-shadow" />
-            <div className="art-caption caption-top">
-              <span>THE ART OF ATMOSPHERE</span>
-              <span>01 / {String(mood + 1).padStart(2, '0')}</span>
-            </div>
+        <section className="experience" aria-label="The Lumora candle journey">
+          <div className="scene-stage">
+            <div className="scene-aura" />
+            <div className="scene-grid" />
             <Suspense
               fallback={
                 <CandleArt
-                  className="scene-loading"
-                  name={heroProduct.name}
+                  className="scene-fallback"
                   color={heroProduct.color}
+                  name={heroProduct.name}
                 />
               }
             >
               <CandleScene color={heroProduct.color} name={heroProduct.name} />
             </Suspense>
-            <div className="hero-product-label">
-              <span className="eyebrow">
-                In the spotlight · {formatPrice(heroProduct.price)}
-              </span>
-              <strong>{heroProduct.name}</strong>
-              <span>{heroProduct.notes}</span>
-              <button
-                className="hero-discover"
-                onClick={() => setProduct(heroProduct)}
-              >
-                Discover the scent <Icon name="arrow" size={16} />
-              </button>
+            <div className="scene-wordmark" aria-hidden="true">
+              LUMORA
             </div>
-            <div
-              className="mood-picker"
-              aria-label="Choose a candle to explore"
-            >
-              {products.map((item, index) => (
-                <button
-                  key={item.id}
-                  className={mood === index ? 'mood-dot active' : 'mood-dot'}
-                  onClick={() => setMood(index)}
-                  aria-label={`Explore ${item.name}`}
-                  aria-pressed={mood === index}
-                  style={{ '--dot-color': item.color } as React.CSSProperties}
-                />
-              ))}
+            <div className="journey-meter" aria-hidden="true">
+              <span />
+              <span />
+              <span />
             </div>
-            <span className="interaction-hint">
-              Move a little. Watch it glow.
+            <span className="scene-side-note" aria-hidden="true">
+              SCENT · LIGHT · FEELING
             </span>
           </div>
-          <a className="hero-scroll" href="#collection">
-            <span>Keep exploring</span>
-            <span>↓</span>
-          </a>
+          <div className="chapter-track">
+            <section className="chapter hero" aria-labelledby="hero-title">
+              <div className="chapter-copy hero-copy">
+                <p className="eyebrow">
+                  <span className="status-dot" /> THE AFTER DARK COLLECTION / 01
+                </p>
+                <h1 id="hero-title">
+                  Light becomes
+                  <br />
+                  <em>atmosphere.</em>
+                </h1>
+                <p className="chapter-description">
+                  When the world gets louder, make your space softer. A little
+                  fragrance. A beautiful kind of quiet.
+                </p>
+                <div className="chapter-actions">
+                  <a className="button button-dark" href="#collection">
+                    Shop the collection <Icon name="arrow" />
+                  </a>
+                  <a className="quiet-link" href="#story">
+                    Enter our world <Icon name="arrow" size={16} />
+                  </a>
+                </div>
+              </div>
+              <div className="hero-product-label">
+                <div>
+                  <span className="eyebrow">IN THE SPOTLIGHT</span>
+                  <strong>{heroProduct.name}</strong>
+                  <span>
+                    {formatPrice(heroProduct.price)} · sample collection
+                  </span>
+                </div>
+                <div
+                  className="mood-picker"
+                  aria-label="Choose a candle to explore"
+                >
+                  {products.map((item, index) => (
+                    <button
+                      key={item.id}
+                      className={
+                        mood === index ? 'mood-dot active' : 'mood-dot'
+                      }
+                      onClick={() => setMood(index)}
+                      aria-label={`Explore ${item.name}`}
+                      aria-pressed={mood === index}
+                      style={
+                        { '--dot-color': item.color } as React.CSSProperties
+                      }
+                    />
+                  ))}
+                </div>
+                <button
+                  className="hero-discover"
+                  onClick={() => setProduct(heroProduct)}
+                  aria-label={`Discover ${heroProduct.name}`}
+                >
+                  Discover the scent <Icon name="arrow" size={16} />
+                </button>
+              </div>
+              <a className="scroll-cue" href="#story">
+                SCROLL TO FEEL IT <span>↓</span>
+              </a>
+            </section>
+            <section
+              className="chapter story-chapter"
+              id="story"
+              aria-labelledby="story-title"
+            >
+              <CandleArt
+                className="chapter-static-art"
+                color={heroProduct.color}
+                name={heroProduct.name}
+              />
+              <div className="chapter-copy">
+                <p className="eyebrow">OUR WORLD / 02</p>
+                <h2 id="story-title">
+                  A scent.
+                  <br />
+                  <em>A feeling.</em>
+                </h2>
+                <p className="chapter-description">
+                  Lumora begins with a simple thought: a familiar room can feel
+                  entirely different in the right light. We create a world
+                  around those small, meaningful moments.
+                </p>
+                <div className="scent-families">
+                  <span>
+                    <i>01</i> Warm & woody
+                  </span>
+                  <span>
+                    <i>02</i> Fresh & earthy
+                  </span>
+                  <span>
+                    <i>03</i> Soft & floral
+                  </span>
+                </div>
+                <a className="quiet-link" href="#collection">
+                  Find your kind of calm <Icon name="arrow" size={18} />
+                </a>
+              </div>
+            </section>
+            <section
+              className="chapter ritual-chapter"
+              id="ritual"
+              aria-labelledby="ritual-title"
+            >
+              <CandleArt
+                className="chapter-static-art"
+                color={heroProduct.color}
+                name={heroProduct.name}
+              />
+              <div className="chapter-copy">
+                <p className="eyebrow">THE EVERYDAY RITUAL / 03</p>
+                <h2 id="ritual-title">
+                  Less hurry.
+                  <br />
+                  <em>More here.</em>
+                </h2>
+                <p className="chapter-description">
+                  An evening to yourself. A slow conversation. A gift that says
+                  you care. Make a little room for the moments that matter.
+                </p>
+                <a className="button button-dark" href="#collection">
+                  Find your glow <Icon name="arrow" />
+                </a>
+                <p className="ritual-caption">
+                  Your space. Your scent. Your moment.
+                </p>
+              </div>
+            </section>
+          </div>
         </section>
-
         <div className="brand-strip">
-          <span>
-            <Icon name="spark" /> A glow for every mood
-          </span>
-          <span>
-            <Icon name="leaf" /> Inspired by the natural world
-          </span>
-          <span>
-            <Icon name="spark" /> Made for your daily rituals
-          </span>
+          <span>THOUGHTFUL GIFTS</span>
+          <span>✦</span>
+          <span>EVERYDAY ESCAPES</span>
+          <span>✦</span>
+          <span>THE LUMORA WAY</span>
         </div>
-
         <section
           className="collection section-shell"
           id="collection"
           aria-labelledby="collection-title"
         >
-          <div className="section-heading">
+          <div className="section-heading reveal">
             <div>
-              <p className="eyebrow">THE LUMORA COLLECTION</p>
+              <p className="eyebrow">THE SCENT EDIT / 04</p>
               <h2 id="collection-title">
-                Find your <em>signature glow.</em>
+                Find your
+                <br />
+                <em>signature glow.</em>
               </h2>
             </div>
-            <p>
-              For thoughtful gifts and everyday escapes.
-              <br />Your next favourite scent starts here.
-            </p>
+            <div className="collection-intro">
+              <p>
+                Four moods. One beautiful ritual.
+                <br />
+                Discover a scent that feels like you.
+              </p>
+              <span>Sample collection · prices in INR</span>
+            </div>
           </div>
-          <div className="collection-toolbar">
+          <div className="collection-toolbar reveal">
             <div className="filter-tabs" aria-label="Filter candles by scent">
               {(
                 [
@@ -363,173 +453,158 @@ export default function App() {
                 </button>
               ))}
             </div>
-            <span className="catalog-note">
-              Sample collection · prices in INR
-            </span>
+            <span className="catalog-note">A mood for every room.</span>
           </div>
           <div className="product-grid">
             {products
               .filter((item) => filter === 'all' || item.category === filter)
-              .map((item) => (
-                <article className="product-card" key={item.id}>
+              .map((item, index) => (
+                <article
+                  className="product-card tilt-card"
+                  key={item.id}
+                  onPointerMove={tiltProduct}
+                  onPointerLeave={resetTilt}
+                  style={
+                    { '--product-glow': item.color } as React.CSSProperties
+                  }
+                >
                   <button
                     className="product-visual"
-                    style={{ background: item.backdrop }}
                     onClick={() => setProduct(item)}
                     aria-label={`View ${item.name} candle details`}
                   >
                     <span className="product-tag">{item.label}</span>
+                    <span className="product-number">0{index + 1}</span>
+                    <div className="product-halo" />
                     <CandleArt name={item.name} color={item.color} />
                     <span className="product-view">
-                      Discover the scent <Icon name="arrow" size={16} />
+                      Explore the scent <Icon name="arrow" size={16} />
                     </span>
                   </button>
-                  <div className="product-title-row">
+                  <div className="product-info">
+                    <div className="product-title-row">
+                      <button
+                        className="product-name"
+                        onClick={() => setProduct(item)}
+                      >
+                        {item.name}
+                      </button>
+                      <span>{formatPrice(item.price)}</span>
+                    </div>
+                    <p className="product-notes">{item.notes}</p>
                     <button
-                      className="product-name"
-                      onClick={() => setProduct(item)}
+                      className="product-add"
+                      onClick={() => addToCart(item.id)}
+                      aria-label={`Add ${item.name} to bag`}
                     >
-                      {item.name}
+                      Add to bag <Icon name="plus" size={18} />
                     </button>
-                    <span>{formatPrice(item.price)}</span>
                   </div>
-                  <p className="product-notes">{item.notes}</p>
-                  <button
-                    className="product-add"
-                    onClick={() => addToCart(item.id)}
-                    aria-label={`Add ${item.name} to bag`}
-                  >
-                    Add to bag <Icon name="plus" size={16} />
-                  </button>
                 </article>
               ))}
           </div>
         </section>
-
-        <section className="story" id="story" aria-labelledby="story-title">
-          <div className="story-art">
-            <img
-              className="story-campaign"
-              src="/images/after-dark-story.webp"
-              alt="Illustrative Lumora candles in warm amber light on a dark stone surface"
-              loading="lazy"
-              width="1024"
-              height="1024"
-            />
-            <span className="story-art-label">
-              AFTER THE SUN SETS.
+        <section className="gifting" id="gifting" aria-labelledby="gift-title">
+          <img
+            className="gift-campaign"
+            src="/images/after-dark-story.webp"
+            alt="Illustrative Lumora candles glowing in amber light on dark stone"
+            loading="lazy"
+            width="1024"
+            height="1024"
+          />
+          <div className="gift-shade" />
+          <div className="gift-copy reveal">
+            <p className="eyebrow">THE ART OF GIVING / 05</p>
+            <h2 id="gift-title">
+              Some gifts
               <br />
-              YOUR MOMENT BEGINS.
-            </span>
-            <span className="story-art-number">The art of slowing down.</span>
-          </div>
-          <div className="story-copy">
-            <p className="eyebrow">THE HEART OF LUMORA</p>
-            <h2 id="story-title">
-              Small flame.
+              say more.
               <br />
-              <em>Entirely different feeling.</em>
+              <em>Without words.</em>
             </h2>
             <p>
-              Lumora is a celebration of the small things: a familiar room, a
-              favourite scent, the gentle glow at the end of a long day.
+              For a new home. A little thank you.
+              <br />
+              Or absolutely no reason at all.
             </p>
-            <p>
-              We’re building a world of candles around a simple idea. Your
-              everyday spaces deserve a little warmth, and you deserve a moment
-              that’s entirely yours.
-            </p>
-            <a className="text-link" href="#ritual">
-              Make room for a ritual <Icon name="arrow" size={18} />
+            <a className="button button-dark" href="#collection">
+              Give a little warmth <Icon name="arrow" />
             </a>
-            <div className="story-signature">
-              With a little light,
-              <br />
-              <span>Lumora</span>
-            </div>
           </div>
+          <span className="gift-footnote">
+            A THOUGHTFUL GIFT. A BEAUTIFUL EVERYDAY ESCAPE.
+          </span>
         </section>
-
         <section
-          className="ritual section-shell"
-          id="ritual"
-          aria-labelledby="ritual-title"
+          className="care-section section-shell"
+          aria-labelledby="care-title"
         >
-          <div className="ritual-heading">
-            <p className="eyebrow">A SMALL RITUAL. A REAL MOMENT.</p>
-            <h2 id="ritual-title">
-              Good things start <em>with a spark.</em>
+          <div className="care-heading reveal">
+            <p className="eyebrow">KEEP THE RITUAL BEAUTIFUL / 06</p>
+            <h2 id="care-title">
+              A little care.
+              <br />
+              <em>A better glow.</em>
             </h2>
+            <p>Simple moments deserve a little attention.</p>
           </div>
-          <div className="ritual-grid">
+          <div className="care-grid">
             {[
-              {
-                number: '01',
-                title: 'Choose your mood',
-                copy: 'Bright and fresh, warm and woody, or beautifully floral. Follow the feeling.',
-              },
-              {
-                number: '02',
-                title: 'Set the scene',
-                copy: 'Place your candle on a stable, heat-resistant surface, away from anything flammable.',
-              },
-              {
-                number: '03',
-                title: 'Be here, now',
-                copy: 'Light the wick. Settle in. Always keep your candle in sight, and extinguish it before leaving.',
-              },
-            ].map((step) => (
-              <div className="ritual-step" key={step.number}>
-                <span className="step-number">{step.number}</span>
-                <h3>{step.title}</h3>
-                <p>{step.copy}</p>
-              </div>
+              [
+                '01',
+                'Trim the wick',
+                'Trim to around 5 mm before lighting, and follow the care instructions on your candle’s label.',
+              ],
+              [
+                '02',
+                'Set the scene',
+                'Use a stable, heat-resistant surface, away from drafts, children, pets, and anything flammable.',
+              ],
+              [
+                '03',
+                'Stay in the moment',
+                'Keep a burning candle in sight. Always extinguish it before leaving the room.',
+              ],
+            ].map(([number, title, copy]) => (
+              <article className="care-card reveal" key={number}>
+                <span>{number}</span>
+                <Icon name="spark" size={26} />
+                <h3>{title}</h3>
+                <p>{copy}</p>
+              </article>
             ))}
           </div>
         </section>
-
-        <section className="quote-section">
-          <span className="quote-symbol">✦</span>
-          <p>
-            A thoughtful gift.
-            <br />
-            <em>A beautiful everyday escape.</em>
-          </p>
-          <span className="eyebrow">FOR THEIR SPACE. FOR YOURS.</span>
-          <a className="button button-dark" href="#collection">
-            Find a little warmth <Icon name="arrow" size={18} />
-          </a>
-        </section>
-
         <section
           className="faq-section section-shell"
           aria-labelledby="faq-title"
         >
-          <div>
-            <p className="eyebrow">A LITTLE MORE TO KNOW</p>
+          <div className="faq-heading reveal">
+            <p className="eyebrow">GOOD TO KNOW / 07</p>
             <h2 id="faq-title">
-              Before you
+              Before the
               <br />
-              <em>light up.</em>
+              <em>first spark.</em>
             </h2>
           </div>
           <div className="faq-list">
             {[
               {
-                title: 'How do I care for my candle?',
-                text: 'Trim the wick to about 5 mm before lighting. Keep the candle on a heat-resistant surface and follow the safety instructions on its label. Never leave a burning candle unattended.',
-              },
-              {
                 title: 'Which scent should I choose?',
                 text: 'Amber Hour and Midnight Fig are warm and woody. Quiet Forest is fresh and earthy. Rosewater is soft and floral. Open any candle’s details to explore its scent notes.',
               },
               {
-                title: 'Can I place an order here?',
-                text: 'You can explore the sample collection and build a shopping bag. Razorpay checkout is available once the store is enabled. During this preview, payments remain disabled while the final catalog, delivery terms, and fulfilment are confirmed.',
+                title: 'Are these the final products and prices?',
+                text: 'This is an illustrative sample collection. Candle shapes, packaging, scent names, and rupee prices will be confirmed before launch.',
               },
               {
-                title: 'Are these the final products and prices?',
-                text: 'This is a preview collection with sample candle names, descriptions, and prices in Indian rupees. The final catalog, ingredients, sizes, and delivery terms will be confirmed before the store launches.',
+                title: 'Can I place an order here?',
+                text: 'Explore the collection and build your bag. Payments remain disabled in this preview until the final catalog, delivery terms, and Razorpay setup are ready.',
+              },
+              {
+                title: 'How do I care for my candle?',
+                text: 'Trim the wick to about 5 mm and follow the instructions on the label. Always use a heat-resistant surface, keep the flame in sight, and extinguish it before leaving.',
               },
             ].map((item, index) => (
               <div className="faq-item" key={item.title}>
@@ -539,6 +614,7 @@ export default function App() {
                     aria-controls={`faq-answer-${index}`}
                     onClick={() => setFaq(faq === index ? null : index)}
                   >
+                    <span className="faq-number">0{index + 1}</span>
                     {item.title}
                     <Icon name={faq === index ? 'minus' : 'plus'} size={18} />
                   </button>
@@ -550,65 +626,68 @@ export default function App() {
             ))}
           </div>
         </section>
-
-        <section className="newsletter">
-          <div>
-            <p className="eyebrow">STAY IN THE GLOW</p>
-            <h2>
-              A little light <em>in your inbox.</em>
+        <section className="newsletter" aria-labelledby="newsletter-title">
+          <div className="newsletter-orbit" aria-hidden="true" />
+          <div className="newsletter-inner reveal">
+            <p className="eyebrow">LET THE GOOD THINGS FIND YOU</p>
+            <h2 id="newsletter-title">
+              Stay in
+              <br />
+              <em>the glow.</em>
             </h2>
-            <p>New scents, small rituals, and things worth slowing down for.</p>
+            <p>New scents. Small rituals. A quieter kind of inspiration.</p>
+            <form onSubmit={subscribe}>
+              <label className="sr-only" htmlFor="email">
+                Email address
+              </label>
+              <div className="email-field">
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  placeholder="Your email address"
+                  disabled={emailSubmitted}
+                />
+                <button
+                  type="submit"
+                  aria-label="Preview newsletter signup"
+                  disabled={emailSubmitted}
+                >
+                  <Icon name={emailSubmitted ? 'check' : 'arrow'} />
+                </button>
+              </div>
+              <p role="status">
+                {emailSubmitted
+                  ? 'Thank you! This signup is a preview; your email has not been sent or stored.'
+                  : 'Preview signup only. We’re not collecting emails yet.'}
+              </p>
+            </form>
           </div>
-          <form onSubmit={subscribe}>
-            <label className="sr-only" htmlFor="email">
-              Email address
-            </label>
-            <div className="email-field">
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                placeholder="Your email address"
-                disabled={emailSubmitted}
-              />
-              <button
-                type="submit"
-                aria-label="Preview newsletter signup"
-                disabled={emailSubmitted}
-              >
-                <Icon name={emailSubmitted ? 'check' : 'arrow'} />
-              </button>
-            </div>
-            <p role="status">
-              {emailSubmitted
-                ? 'You’re interested — thank you! Signup is a preview; your email has not been sent or stored.'
-                : 'Preview signup only. We’re not collecting emails yet.'}
-            </p>
-          </form>
         </section>
       </main>
-
       <footer className="site-footer">
         <div className="footer-top">
-          <a className="wordmark" href="#">
-            lumora<span>✦</span>
-          </a>
-          <p>
-            Find your glow.
-            <br />
-            Make yourself at home.
-          </p>
+          <div>
+            <a className="footer-wordmark" href="#">
+              lumora<span>✦</span>
+            </a>
+            <p>A little light. An entirely different feeling.</p>
+          </div>
           <nav aria-label="Footer navigation">
-            <a href="#collection">Shop the collection</a>
-            <a href="#story">Our story</a>
-            <a href="#ritual">Candle care</a>
+            <a href="#collection">The collection</a>
+            <a href="#story">Our world</a>
+            <a href="#gifting">Gifting</a>
+            <a href="#ritual">The ritual</a>
           </nav>
+          <a className="back-to-top" href="#" aria-label="Back to top">
+            ↑
+          </a>
         </div>
         <div className="footer-bottom">
           <span>© {new Date().getFullYear()} Lumora</span>
-          <span>Candle portfolio & storefront</span>
-          <a href="#">Back to the light ↑</a>
+          <span>A candle portfolio & sample storefront</span>
+          <span>MADE FOR THE MOMENTS IN BETWEEN</span>
         </div>
       </footer>
 

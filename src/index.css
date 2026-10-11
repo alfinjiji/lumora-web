@@ -1,16 +1,16 @@
 :root {
   font-family: Arial, Helvetica, sans-serif;
   color: #f6ead9;
-  background: #100e0c;
+  background: #090807;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  --paper: #100e0c;
+  --paper: #090807;
   --ink: #f6ead9;
   --muted: #b9aa98;
   --rust: #e0b77d;
-  --line: #ffffff21;
+  --line: #ae824640;
   --serif: Georgia, 'Times New Roman', serif;
   font-size: 15px;
   color-scheme: dark;
@@ -20,7 +20,7 @@
 }
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 100px;
+  scroll-padding-top: 88px;
 }
 body {
   margin: 0;
@@ -88,7 +88,7 @@ button:focus-visible {
   outline-offset: 3px;
 }
 section[id] {
-  scroll-margin-top: 90px;
+  scroll-margin-top: 0;
 }
 .sr-only {
   position: absolute;

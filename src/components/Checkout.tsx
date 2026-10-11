@@ -186,7 +186,7 @@ export default function Checkout({
           email: customer.email,
           contact: customer.phone,
         },
-        theme: { color: '#9e5e40' },
+        theme: { color: '#b78344' },
         handler: (result) => {
           void verify(result)
         },
