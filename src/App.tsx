@@ -1,12 +1,10 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import CandleArt from './components/CandleArt'
 import Checkout from './components/Checkout'
 import { products, formatPrice } from './products'
 import type { Product, Mood } from './products'
 import './App.css'
 
-const CandleScene = lazy(() => import('./components/CandleScene'))
 type CartItem = { id: string; quantity: number }
 type IconName =
   | 'bag'
@@ -111,7 +109,6 @@ function resetTilt(event: React.PointerEvent<HTMLElement>) {
 }
 
 export default function App() {
-  const [mood, setMood] = useState(0)
   const [filter, setFilter] = useState<Mood | 'all'>('all')
   const [cart, setCart] = useState<CartItem[]>(readCart)
   const [cartOpen, setCartOpen] = useState(false)
@@ -124,7 +121,6 @@ export default function App() {
   const [emailSubmitted, setEmailSubmitted] = useState(false)
   const cartDialog = useRef<HTMLDialogElement>(null)
   const productDialog = useRef<HTMLDialogElement>(null)
-  const heroProduct = products[mood]
   const count = cart.reduce((sum, item) => sum + item.quantity, 0)
   const subtotal = cart.reduce(
     (sum, item) =>
@@ -162,6 +158,42 @@ export default function App() {
       document.body.style.overflow = previous
     }
   }, [cartOpen, product])
+
+  useEffect(() => {
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const images = [...document.querySelectorAll<HTMLElement>('[data-depth]')]
+    let frame = 0
+    const measure = () => {
+      frame = 0
+      for (const element of images) {
+        const rect = element.getBoundingClientRect()
+        const amount = motion.matches
+          ? 0
+          : Math.max(
+              -1,
+              Math.min(
+                1,
+                (rect.top + rect.height / 2 - innerHeight / 2) / innerHeight,
+              ),
+            )
+        element.style.setProperty('--scroll-y', `${amount * -32}px`)
+        element.style.setProperty('--scroll-tilt', `${amount * 2}deg`)
+      }
+    }
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(measure)
+    }
+    window.addEventListener('scroll', schedule, { passive: true })
+    window.addEventListener('resize', schedule)
+    motion.addEventListener('change', schedule)
+    measure()
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', schedule)
+      window.removeEventListener('resize', schedule)
+      motion.removeEventListener('change', schedule)
+    }
+  }, [])
 
   const addToCart = (id: string) => {
     setReceipt('')
@@ -244,164 +276,42 @@ export default function App() {
         </div>
       </header>
       <main id="main">
-        <section className="experience" aria-label="The Lumora candle journey">
-          <div className="scene-stage">
-            <div className="scene-aura" />
-            <div className="scene-grid" />
-            <Suspense
-              fallback={
-                <CandleArt
-                  className="scene-fallback"
-                  color={heroProduct.color}
-                  name={heroProduct.name}
-                />
-              }
-            >
-              <CandleScene color={heroProduct.color} name={heroProduct.name} />
-            </Suspense>
-            <div className="scene-wordmark" aria-hidden="true">
-              LUMORA
-            </div>
-            <div className="journey-meter" aria-hidden="true">
-              <span />
-              <span />
-              <span />
-            </div>
-            <span className="scene-side-note" aria-hidden="true">
-              SCENT · LIGHT · FEELING
-            </span>
+        <section className="photo-hero" aria-labelledby="hero-title">
+          <div className="hero-image depth-image" data-depth="hero">
+            <img
+              src="/images/after-dark-story.webp"
+              alt="Approved Lumora campaign illustration: an amber ribbed-glass candle glowing on dark stone"
+              width="1024"
+              height="1024"
+              fetchPriority="high"
+            />
           </div>
-          <div className="chapter-track">
-            <section className="chapter hero" aria-labelledby="hero-title">
-              <div className="chapter-copy hero-copy">
-                <p className="eyebrow">
-                  <span className="status-dot" /> THE AFTER DARK COLLECTION / 01
-                </p>
-                <h1 id="hero-title">
-                  Light becomes
-                  <br />
-                  <em>atmosphere.</em>
-                </h1>
-                <p className="chapter-description">
-                  When the world gets louder, make your space softer. A little
-                  fragrance. A beautiful kind of quiet.
-                </p>
-                <div className="chapter-actions">
-                  <a className="button button-dark" href="#collection">
-                    Shop the collection <Icon name="arrow" />
-                  </a>
-                  <a className="quiet-link" href="#story">
-                    Enter our world <Icon name="arrow" size={16} />
-                  </a>
-                </div>
-              </div>
-              <div className="hero-product-label">
-                <div>
-                  <span className="eyebrow">IN THE SPOTLIGHT</span>
-                  <strong>{heroProduct.name}</strong>
-                  <span>
-                    {formatPrice(heroProduct.price)} · sample collection
-                  </span>
-                </div>
-                <div
-                  className="mood-picker"
-                  aria-label="Choose a candle to explore"
-                >
-                  {products.map((item, index) => (
-                    <button
-                      key={item.id}
-                      className={
-                        mood === index ? 'mood-dot active' : 'mood-dot'
-                      }
-                      onClick={() => setMood(index)}
-                      aria-label={`Explore ${item.name}`}
-                      aria-pressed={mood === index}
-                      style={
-                        { '--dot-color': item.color } as React.CSSProperties
-                      }
-                    />
-                  ))}
-                </div>
-                <button
-                  className="hero-discover"
-                  onClick={() => setProduct(heroProduct)}
-                  aria-label={`Discover ${heroProduct.name}`}
-                >
-                  Discover the scent <Icon name="arrow" size={16} />
-                </button>
-              </div>
-              <a className="scroll-cue" href="#story">
-                SCROLL TO FEEL IT <span>↓</span>
-              </a>
-            </section>
-            <section
-              className="chapter story-chapter"
-              id="story"
-              aria-labelledby="story-title"
-            >
-              <CandleArt
-                className="chapter-static-art"
-                color={heroProduct.color}
-                name={heroProduct.name}
-              />
-              <div className="chapter-copy">
-                <p className="eyebrow">OUR WORLD / 02</p>
-                <h2 id="story-title">
-                  A scent.
-                  <br />
-                  <em>A feeling.</em>
-                </h2>
-                <p className="chapter-description">
-                  Lumora begins with a simple thought: a familiar room can feel
-                  entirely different in the right light. We create a world
-                  around those small, meaningful moments.
-                </p>
-                <div className="scent-families">
-                  <span>
-                    <i>01</i> Warm & woody
-                  </span>
-                  <span>
-                    <i>02</i> Fresh & earthy
-                  </span>
-                  <span>
-                    <i>03</i> Soft & floral
-                  </span>
-                </div>
-                <a className="quiet-link" href="#collection">
-                  Find your kind of calm <Icon name="arrow" size={18} />
-                </a>
-              </div>
-            </section>
-            <section
-              className="chapter ritual-chapter"
-              id="ritual"
-              aria-labelledby="ritual-title"
-            >
-              <CandleArt
-                className="chapter-static-art"
-                color={heroProduct.color}
-                name={heroProduct.name}
-              />
-              <div className="chapter-copy">
-                <p className="eyebrow">THE EVERYDAY RITUAL / 03</p>
-                <h2 id="ritual-title">
-                  Less hurry.
-                  <br />
-                  <em>More here.</em>
-                </h2>
-                <p className="chapter-description">
-                  An evening to yourself. A slow conversation. A gift that says
-                  you care. Make a little room for the moments that matter.
-                </p>
-                <a className="button button-dark" href="#collection">
-                  Find your glow <Icon name="arrow" />
-                </a>
-                <p className="ritual-caption">
-                  Your space. Your scent. Your moment.
-                </p>
-              </div>
-            </section>
+          <div className="hero-shade" />
+          <div className="hero-copy">
+            <p className="eyebrow">
+              <span className="status-dot" /> LUMORA / THE AFTER DARK EDIT
+            </p>
+            <h1 id="hero-title">
+              For the hours
+              <br />
+              that feel <br />
+              <em>like yours.</em>
+            </h1>
+            <p>
+              A familiar room. A softer light. Discover fragrances made for the
+              moments you want to keep.
+            </p>
+            <a className="button button-dark" href="#collection">
+              Find your candle <Icon name="arrow" />
+            </a>
           </div>
+          <div className="hero-bottom">
+            <a href="#collection">
+              EXPLORE THE SCENT EDIT <span>↓</span>
+            </a>
+            <span>01 / LIGHT, WITH FEELING</span>
+          </div>
+          <span className="hero-image-note">Approved campaign concept</span>
         </section>
         <div className="brand-strip">
           <span>THOUGHTFUL GIFTS</span>
@@ -417,7 +327,7 @@ export default function App() {
         >
           <div className="section-heading reveal">
             <div>
-              <p className="eyebrow">THE SCENT EDIT / 04</p>
+              <p className="eyebrow">THE SCENT EDIT / 01</p>
               <h2 id="collection-title">
                 Find your
                 <br />
@@ -430,7 +340,7 @@ export default function App() {
                 <br />
                 Discover a scent that feels like you.
               </p>
-              <span>Sample collection · prices in INR</span>
+              <span>Sample collection · INR · licensed mood photography</span>
             </div>
           </div>
           <div className="collection-toolbar reveal">
@@ -475,8 +385,14 @@ export default function App() {
                   >
                     <span className="product-tag">{item.label}</span>
                     <span className="product-number">0{index + 1}</span>
-                    <div className="product-halo" />
-                    <CandleArt name={item.name} color={item.color} />
+                    <img
+                      src={item.image}
+                      alt={item.imageAlt}
+                      width="750"
+                      height="1000"
+                      loading="lazy"
+                      decoding="async"
+                    />
                     <span className="product-view">
                       Explore the scent <Icon name="arrow" size={16} />
                     </span>
@@ -504,44 +420,131 @@ export default function App() {
               ))}
           </div>
         </section>
-        <section className="gifting" id="gifting" aria-labelledby="gift-title">
-          <img
-            className="gift-campaign"
-            src="/images/after-dark-story.webp"
-            alt="Illustrative Lumora candles glowing in amber light on dark stone"
-            loading="lazy"
-            width="1024"
-            height="1024"
-          />
-          <div className="gift-shade" />
-          <div className="gift-copy reveal">
-            <p className="eyebrow">THE ART OF GIVING / 05</p>
-            <h2 id="gift-title">
-              Some gifts
+        <section
+          className="story-section section-shell"
+          id="story"
+          aria-labelledby="story-title"
+        >
+          <div className="story-photo depth-image" data-depth="story">
+            <img
+              src="/images/photography/our-world.jpg"
+              alt="Candles beside a window, plants, a book, and a cup"
+              width="1000"
+              height="1200"
+              loading="lazy"
+              decoding="async"
+            />
+            <span className="photo-caption">
+              A SMALL RITUAL. AN ENTIRELY DIFFERENT FEELING.
+            </span>
+          </div>
+          <div className="story-copy reveal">
+            <p className="eyebrow">OUR WORLD / 02</p>
+            <h2 id="story-title">
+              Beautiful things.
               <br />
-              say more.
-              <br />
-              <em>Without words.</em>
+              <em>Everyday moments.</em>
             </h2>
             <p>
-              For a new home. A little thank you.
+              Lumora begins with a simple thought: a little light can change the
+              way a room feels. We’re a new candle studio, building a collection
+              for quiet evenings, thoughtful gifts, and the spaces you call your
+              own.
+            </p>
+            <div className="scent-families">
+              <span>
+                <i>01</i> Warm & woody
+              </span>
+              <span>
+                <i>02</i> Fresh & earthy
+              </span>
+              <span>
+                <i>03</i> Soft & floral
+              </span>
+            </div>
+            <a className="quiet-link" href="#collection">
+              Find your kind of calm <Icon name="arrow" size={18} />
+            </a>
+          </div>
+        </section>
+        <section
+          className="ritual-section"
+          id="ritual"
+          aria-labelledby="ritual-title"
+        >
+          <div className="ritual-photo depth-image" data-depth="ritual">
+            <img
+              src="/images/photography/evening-ritual.jpg"
+              alt="A photographic arrangement of red, amber, and white glass candles"
+              width="1600"
+              height="1000"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div className="ritual-shade" />
+          <div className="ritual-copy">
+            <p className="eyebrow">MAKE ROOM FOR YOURSELF / 03</p>
+            <h2 id="ritual-title">
+              Less hurry.
               <br />
-              Or absolutely no reason at all.
+              <em>More here.</em>
+            </h2>
+            <p>
+              A slow conversation. A favourite song. An evening with nowhere
+              else to be.
+            </p>
+            <a className="quiet-link" href="#collection">
+              Set your own mood <Icon name="arrow" />
+            </a>
+          </div>
+          <span className="ritual-index">THE LUMORA RITUAL</span>
+        </section>
+        <section
+          className="gifting section-shell"
+          id="gifting"
+          aria-labelledby="gift-title"
+        >
+          <div className="gift-copy reveal">
+            <p className="eyebrow">THE ART OF GIVING / 04</p>
+            <h2 id="gift-title">
+              A little warmth.
+              <br />
+              <em>A lot of meaning.</em>
+            </h2>
+            <p>
+              A new home. A birthday. A quiet thank you. Find a fragrance for
+              someone’s favourite corner of the world.
             </p>
             <a className="button button-dark" href="#collection">
               Give a little warmth <Icon name="arrow" />
             </a>
+            <span className="gift-footnote">
+              THOUGHTFUL GIFTS, STARTING WITH A FEELING.
+            </span>
           </div>
-          <span className="gift-footnote">
-            A THOUGHTFUL GIFT. A BEAUTIFUL EVERYDAY ESCAPE.
-          </span>
+          <div className="gift-photo depth-image" data-depth="gift">
+            <img
+              src="/images/photography/thoughtful-gifts.jpg"
+              alt="Amber glass candles and gift packaging arranged on pale stone"
+              width="1000"
+              height="1100"
+              loading="lazy"
+              decoding="async"
+            />
+            <span className="gift-photo-label">
+              For someone.
+              <br />
+              <em>Or just for you.</em>
+            </span>
+          </div>
         </section>
         <section
           className="care-section section-shell"
           aria-labelledby="care-title"
         >
           <div className="care-heading reveal">
-            <p className="eyebrow">KEEP THE RITUAL BEAUTIFUL / 06</p>
+            <p className="eyebrow">KEEP THE RITUAL BEAUTIFUL / 05</p>
             <h2 id="care-title">
               A little care.
               <br />
@@ -581,7 +584,7 @@ export default function App() {
           aria-labelledby="faq-title"
         >
           <div className="faq-heading reveal">
-            <p className="eyebrow">GOOD TO KNOW / 07</p>
+            <p className="eyebrow">GOOD TO KNOW / 06</p>
             <h2 id="faq-title">
               Before the
               <br />
@@ -596,7 +599,7 @@ export default function App() {
               },
               {
                 title: 'Are these the final products and prices?',
-                text: 'This is an illustrative sample collection. Candle shapes, packaging, scent names, and rupee prices will be confirmed before launch.',
+                text: 'This is a sample collection. Licensed photographs show scent moods and styling, rather than final Lumora inventory. Our approved hero is a campaign illustration. Actual product photographs, packaging, scent names, and rupee prices will be confirmed before launch.',
               },
               {
                 title: 'Can I place an order here?',
@@ -686,7 +689,9 @@ export default function App() {
         </div>
         <div className="footer-bottom">
           <span>© {new Date().getFullYear()} Lumora</span>
-          <span>A candle portfolio & sample storefront</span>
+          <a href="/image-credits.html">
+            Photography & image credits ↗
+          </a>
           <span>MADE FOR THE MOMENTS IN BETWEEN</span>
         </div>
       </footer>
@@ -724,9 +729,17 @@ export default function App() {
             </button>
             <div
               className="detail-art"
-              style={{ background: product.backdrop }}
+              style={{ '--scent-color': product.color } as React.CSSProperties}
             >
-              <CandleArt name={product.name} color={product.color} />
+              <span className="eyebrow">THE SCENT PROFILE</span>
+              <span className="detail-monogram" aria-hidden="true">
+                l.
+              </span>
+              <span className="detail-product-name">{product.name}</span>
+              <p>{product.notes}</p>
+              <span className="detail-profile-note">
+                Explore the feeling behind the fragrance.
+              </span>
             </div>
             <div className="detail-copy">
               <p className="eyebrow">{product.label}</p>
@@ -738,7 +751,8 @@ export default function App() {
                 <p>{product.notes}</p>
               </div>
               <p className="detail-disclaimer">
-                Sample product. Size, wax blend, burn time, and final price will
+                Sample product. Photography is for mood and styling. Actual
+                product photos, size, wax blend, burn time, and final price will
                 be confirmed before launch.
               </p>
               <button
@@ -824,9 +838,14 @@ export default function App() {
                     <div className="cart-item" key={item.id}>
                       <div
                         className="cart-item-art"
-                        style={{ background: candle.backdrop }}
+                        style={
+                          {
+                            '--scent-color': candle.color,
+                          } as React.CSSProperties
+                        }
+                        aria-hidden="true"
                       >
-                        <CandleArt name={candle.name} color={candle.color} />
+                        <span>l.</span>
                       </div>
                       <div className="cart-item-info">
                         <h3>{candle.name}</h3>

@@ -9,6 +9,8 @@ export type Product = {
   color: string
   backdrop: string
   label: string
+  image: string
+  imageAlt: string
 }
 
 // Sample catalog. Replace these entries with confirmed products before launch.
@@ -24,6 +26,9 @@ export const products: Product[] = [
     color: '#a36234',
     backdrop: '#241c15',
     label: 'The golden one',
+    image: '/images/photography/amber-hour.jpg',
+    imageAlt:
+      'Textured ceramic candle with a wooden lid and dried foliage, illustrating the Amber Hour scent mood',
   },
   {
     id: 'quiet-forest',
@@ -36,6 +41,9 @@ export const products: Product[] = [
     color: '#59634a',
     backdrop: '#1b2019',
     label: 'A breath of calm',
+    image: '/images/photography/quiet-forest.jpg',
+    imageAlt:
+      'Three ivory pillar candles on a wooden table, illustrating the Quiet Forest scent mood',
   },
   {
     id: 'rosewater',
@@ -48,6 +56,9 @@ export const products: Product[] = [
     color: '#a96f66',
     backdrop: '#291c1d',
     label: 'Something soft',
+    image: '/images/photography/rosewater.jpg',
+    imageAlt:
+      'A candle in clear glass with berries and dried fruit, illustrating the Rosewater scent mood',
   },
   {
     id: 'midnight-fig',
@@ -60,6 +71,9 @@ export const products: Product[] = [
     color: '#4e424b',
     backdrop: '#211b24',
     label: 'After the sun sets',
+    image: '/images/photography/midnight-fig.jpg',
+    imageAlt:
+      'An unlit amber glass candle in natural studio light, illustrating the Midnight Fig scent mood',
   },
 ]
 

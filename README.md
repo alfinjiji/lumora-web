@@ -1,11 +1,11 @@
 # Lumora — Find your glow
 
-A responsive candle portfolio and storefront built with React, TypeScript, Vite, Three.js, and a Node.js / SQLite backend. Prices are in Indian rupees.
+A responsive candle portfolio and storefront built with React, TypeScript, Vite, and a Node.js / SQLite backend. Prices are in Indian rupees.
 
 ## Features
 
-- A pinned, three-chapter WebGL story: native scrolling moves and rotates the candle, changes the camera distance, and reveals its glass details.
-- Lazy-loaded 3D, capped pixel density, off-screen rendering pause, reduced-motion support, and a local WebP fallback.
+- A photographic After Dark layout with an approved full-screen campaign image and distinct photo placements.
+- Native-scroll photo parallax, perspective depth, pointer tilt, and reduced-motion support.
 - Scent filters, product details, responsive navigation, brand story, candle care, and FAQ.
 - A browser-persistent shopping bag with quantity controls and INR totals.
 - A delivery form and Razorpay checkout with server-calculated amounts.
@@ -29,7 +29,7 @@ npm test
 npm run build
 ```
 
-The 12 backend tests use local fixtures, not live payments. They cover price tampering, invalid quantities and delivery data, forged signatures, capture failure, repeated callbacks, signed webhooks, upstream errors, and database persistence. Desktop/mobile browser checks were also run for shopping, checkout UI, payment retries, WebGL fallback, and reduced-motion behavior.
+The 12 backend tests use local fixtures, not live payments. They cover price tampering, invalid quantities and delivery data, forged signatures, capture failure, repeated callbacks, signed webhooks, upstream errors, and database persistence. Desktop/mobile browser checks were also run for shopping, checkout UI, payment retries and reduced-motion behavior.
 
 ## Razorpay configuration
 
@@ -65,14 +65,13 @@ The Node server serves both the built website and API on port 3001. Deploy behin
 
 Payments are created in paise from the server's catalog; browser prices are never trusted. An order is confirmed only after signature verification and a matching captured Razorpay payment. After an interrupted confirmation, customers can retry verification of the existing payment rather than paying again.
 
-The newsletter form is a preview only; it does not send or store email addresses. The 3D renderer is a separate chunk; Vite may report a chunk-size warning for Three.js.
+The newsletter form is a preview only; it does not send or store email addresses. The current layout uses photographic depth effects and does not load the earlier WebGL model.
 
 ## Main files
 
 - `src/App.tsx`: brand sections, catalog filters, dialogs, and shopping bag.
 - `src/products.ts`: shared sample catalog and INR formatting.
-- `src/components/CandleScene.tsx`: WebGL model and animation.
-- `src/components/CandleArt.tsx`: static 3D product renders and the WebGL fallback.
+- `public/images/photography/`: seven distinct stock photographs and `SOURCES.json` provenance.
 - `src/components/Checkout.tsx`: delivery form, SDK handoff, and confirmation retries.
 - `server/store.mjs`: order calculation, signature verification, capture, and webhooks.
 - `server/index.mjs`: HTTP API and production static server.
@@ -92,16 +91,35 @@ Installation needs `registry.npmjs.org`. Payment integration needs `api.razorpay
 
 Restart frontend/backend processes in new tasks. Readiness checks are the hero, product filters, cart, and `/api/health`; a running port alone is insufficient. Missing Razorpay credentials leave the portfolio and cart available while checkout remains disabled.
 
-## After Dark design
+## After Dark photography revision
 
-The entire page uses the After Dark direction: a full-screen candle journey, sculpted product cards, a cinematic gifting section, a care guide, redesigned FAQs, a centered signup area, a large wordmark footer, and matching product/cart/checkout dialogs. Scroll position changes the actual Three.js composition and camera; the canvas stays mounted across the three chapters. Native scrolling is retained, with no wheel interception or forced transitions.
+The page now uses a full-screen campaign hero, an ivory scent collection, a photographic brand story, a full-width evening ritual, an editorial gifting section, care guidance, FAQs, newsletter preview, and matching shopping dialogs. Native scroll changes photo offsets and perspective; there is no wheel interception. Pointer movement tilts product cards. Reduced-motion preferences disable these transforms.
 
-On supported browsers, product cards enter with perspective depth and the gifting image moves subtly with the scroll. Pointer movement tilts product cards. Reduced-motion preferences unpin the scene and retain static chapter illustrations. Rendering pauses offscreen and when the document is hidden; pixel count and frame rate are capped. A local image remains visible when WebGL is unavailable.
+The user's approved `public/images/after-dark-story.webp` appears once in the hero. It is an AI-generated campaign illustration, not original Lumora photography. All seven other image placements use separate photographic assets: four catalog moods, Our world, the evening ritual, and gifting. Product details and cart entries use scent typography rather than repeat those images. Stock photographs represent styling and scent moods, not actual Lumora products; the sample catalog must be confirmed before launch.
 
-Product cards reuse static WebP renders of the same model to avoid extra WebGL contexts. `public/images/after-dark-story.webp` is AI-generated illustrative campaign imagery, not a photograph of confirmed inventory. All shapes, packaging, names, and prices are samples until the actual products are supplied.
+The seven photographic assets are now present. `public/images/photography/SOURCES.json` records sources, the Unsplash License link, available photographer attributions, and unique SHA-256 hashes. Five files come from credited Unsplash downloads preserved in a public source repository; two are downloaded directly from the Unsplash image CDN. Some visible labels belong to the stock-photo brands. They are not Lumora packaging. Unsplash photo pages require an access challenge, so missing photographer names are explicitly recorded as unavailable rather than inferred. The photo-credits page links to the sources.
+
+Instagram references supplied by the user: [gocthom\_](https://www.instagram.com/gocthom_/) and [elora_craft_studio](https://www.instagram.com/elora_craft_studio/). Public profile metadata could be read, but post images were unavailable without further access. Do not claim those posts were visually reviewed. Original product images supplied by the user can later replace the temporary stock photography.
+
+### Downloadable interactive design review
+
+To create a single HTML file that opens directly in a browser without installing Node on the viewer's computer:
+
+```sh
+npm run build
+node scripts/export-preview.mjs
+```
+
+Open the generated `lumora-preview.html`. All images, CSS, and application JavaScript are embedded. Product filters, scent details, cart quantities, and native-scroll depth work. The exported file explicitly disables payments and uses a preview-only shop response; it is a design review, not a deployed storefront. The normal application still uses its real backend. Image credits are embedded below the page. No server or third-party asset requests are needed to view the file.
+
+### Hosted design preview with GitHub Pages
+
+The manual `.github/workflows/design-preview.yml` workflow publishes the same interactive review through GitHub Pages. It does not run automatically or enable real payments. In the repository's **Settings → Pages**, select **GitHub Actions** as the source. Then open **Actions → Publish Lumora design preview → Run workflow**. After deployment succeeds, use the URL reported by that workflow. The workflow has been prepared and its YAML checked locally; no GitHub deployment or public preview has been confirmed from this cloud task.
+
+A complete ecommerce deployment still needs the Node backend, secure Razorpay runtime credentials, and persistent order storage. The Pages workflow hosts the explicitly marked design review.
 
 ## Viewing a live preview
 
 For a live preview on your own computer, clone the repository, install Node.js 24, run `npm ci`, then `npm run dev`. Open the local address printed by Vite in that computer’s browser. Keep the command running while viewing; changes reload automatically.
 
-A localhost server in the cloud environment is not a public website. A Codex browser-panel request is not proof of port forwarding or browser access; the current task reports no preview capability. A shareable Internet preview requires a deployment or supported cloud port forwarding. Publishing the environment configuration does not deploy the website.
+A localhost server in the cloud environment is not a public website. A Codex browser-panel request is not proof of port forwarding or browser access; the current task reports no preview capability. A shareable Internet preview requires a successful deployment, such as the manual Pages workflow above, or supported cloud port forwarding. Publishing the environment configuration does not deploy the website.
