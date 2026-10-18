@@ -27,7 +27,7 @@ npm start
 The user-provided `Auraflare-Design-Codex-Reference.zip` is the authoritative reference. Its snapshot revision is `c13891a4c170e88013f5e034c967f083f9e1232c`. The legacy live reference is <https://stillwick-candle-studio.mailfordev97.chatgpt.site/>; the brand is **Auraflare**.
 
 - Full photographic hero, rounded image covers, compact sticky navigation and the source’s final burgundy CSS overrides.
-- Quote-first introduction on full loads; skip, Escape, completion and footer replay. Reduced motion bypasses the introduction and disables decorative movement.
+- Quote-first introduction on full loads (about 4.15 seconds, matching the updated prototype); skip, Escape, completion and footer replay. Reduced motion bypasses the introduction and disables decorative movement.
 - Home, gifting and sculptural filters, featured/price sorting, product dialogs, quick-add, persistent bag, quantities/removal and INR subtotals. Price sorting also remains available on mobile.
 - Story, occasions, care FAQ, closing CTA and the supplied footer.
 - Demo checkout with explicit simulated completion; event enquiries are previews and send/store no form information.

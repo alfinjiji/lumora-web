@@ -72,7 +72,7 @@ export default function App() {
     return () => cancelAnimationFrame(frame)
   }, [introActive])
   const finishIntro = useCallback(() => {
-    document.documentElement.classList.remove('intro-pending')
+    document.documentElement.classList.remove('intro-pending', 'intro-active')
     document.documentElement.classList.add('entrance-visible')
     restoreIntroFocus.current = true
     setIntroActive(false)

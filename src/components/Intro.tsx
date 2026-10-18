@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 
+const quote = 'A little light. A slower moment.'
+
 declare global {
   interface Window {
     auraflareIntroFallback?: number
@@ -8,7 +10,6 @@ declare global {
 }
 
 export default function Intro({ onFinish }: { onFinish(): void }) {
-  const [quote, setQuote] = useState('')
   const [leaving, setLeaving] = useState(false)
   const skip = useRef<HTMLButtonElement>(null)
 
@@ -19,7 +20,7 @@ export default function Intro({ onFinish }: { onFinish(): void }) {
     const later = (callback: () => void, delay: number) =>
       timers.push(window.setTimeout(callback, delay))
     const finish = () => {
-      root.classList.remove('intro-pending')
+      root.classList.remove('intro-pending', 'intro-active')
       root.classList.add('entrance-visible')
       onFinish()
     }
@@ -37,24 +38,22 @@ export default function Intro({ onFinish }: { onFinish(): void }) {
     }
     clearTimeout(window.auraflareIntroFallback)
     root.classList.remove('entrance-visible')
-    root.classList.add('intro-pending')
+    root.classList.add('intro-pending', 'intro-active')
     skip.current?.focus({ preventScroll: true })
     document.addEventListener('keydown', onKey)
     media.addEventListener('change', onMotion)
-    const fullQuote = 'A little light. A slower moment.'
-    for (let index = 0; index < fullQuote.length; index++)
-      later(() => setQuote(fullQuote.slice(0, index + 1)), 1500 + index * 55)
+    // Paint the page behind the opaque overlay before its slide begins.
+    later(() => root.classList.remove('intro-pending'), 3000)
     later(() => {
       setLeaving(true)
-      root.classList.remove('intro-pending')
       root.classList.add('entrance-visible')
-    }, 4050)
-    later(finish, 5000)
+    }, 3300)
+    later(finish, 4150)
     return () => {
       timers.forEach(clearTimeout)
       document.removeEventListener('keydown', onKey)
       media.removeEventListener('change', onMotion)
-      root.classList.remove('intro-pending')
+      root.classList.remove('intro-pending', 'intro-active')
     }
   }, [onFinish])
 
@@ -77,8 +76,13 @@ export default function Intro({ onFinish }: { onFinish(): void }) {
         </div>
       </div>
       <div className="opening-quote" aria-label="A little light. A slower moment.">
-        <span className="typed-quote" aria-hidden="true">{quote}</span>
-        <span className="typing-cursor" aria-hidden="true" />
+        <span className="typed-quote" aria-hidden="true">
+          {Array.from(quote, (character, index) => (
+            <span key={index} className="quote-character" style={{ '--character-delay': `${1100 + index * 45}ms` } as CSSProperties}>
+              {character === ' ' ? '\u00a0' : character}
+            </span>
+          ))}
+        </span>
       </div>
       <span className="opening-footnote">SMALL RITUALS. LOVELY MOMENTS.</span>
       <button ref={skip} className="skip-opening" type="button" onClick={onFinish}>
