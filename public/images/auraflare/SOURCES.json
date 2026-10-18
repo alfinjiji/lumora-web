@@ -1,0 +1,53 @@
+{
+  "source": "Auraflare-Design-Codex-Reference.zip",
+  "reference_url": "https://stillwick-candle-studio.mailfordev97.chatgpt.site/",
+  "source_revision": "c13891a4c170e88013f5e034c967f083f9e1232c",
+  "note": "User-provided approved imagery, copied without modification. No new product images generated. Product names and prices are illustrative. No independent photography-origin or license claim is made by this app.",
+  "images": [
+    {
+      "file": "bubble.webp",
+      "sha256": "6e600661386c5f5e1b30865298ad1ff5c41d5c152e4712a9b090052214bd17f2",
+      "source": "User-supplied Auraflare design reference archive"
+    },
+    {
+      "file": "glass.webp",
+      "sha256": "e33ed533321b7aa16abc9fb18f58f9301d0493f3ee578800488c8af5aee424f2",
+      "source": "User-supplied Auraflare design reference archive"
+    },
+    {
+      "file": "hearts.webp",
+      "sha256": "da26d846333f3453f170559e481d51222e327f20d54785e69a0faa2e4ddb2852",
+      "source": "User-supplied Auraflare design reference archive"
+    },
+    {
+      "file": "hero.webp",
+      "sha256": "669084e4042d3bc865bf28dffab9a958d1d4f2b527c4b5add4ba3bc94b62c1d5",
+      "source": "User-supplied Auraflare design reference archive"
+    },
+    {
+      "file": "jar.webp",
+      "sha256": "f697417569b66e0e402e31b706fefbfe8c3589c65d6d1f994389c710106e35fb",
+      "source": "User-supplied Auraflare design reference archive"
+    },
+    {
+      "file": "lotus.webp",
+      "sha256": "ad3ece946c2c986ca150977008b808b12aa3697f8a8a8c385dbb82efe84a5410",
+      "source": "User-supplied Auraflare design reference archive"
+    },
+    {
+      "file": "pillars.webp",
+      "sha256": "59468f72a5959a1fbde818300c62fee6582e493e741450ab7435019f46c97e59",
+      "source": "User-supplied Auraflare design reference archive"
+    },
+    {
+      "file": "tealights.webp",
+      "sha256": "3c125d55e70fb211f0bca52430122f0b9aef5ca6c2943809cd05e1919181a3f0",
+      "source": "User-supplied Auraflare design reference archive"
+    },
+    {
+      "file": "violet.webp",
+      "sha256": "96ba9d756ef5caaebfc770a4a9b2b46c3811c416019dba03f352d9d046d630e7",
+      "source": "User-supplied Auraflare design reference archive"
+    }
+  ]
+}

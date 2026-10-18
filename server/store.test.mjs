@@ -10,8 +10,8 @@ const env = {
   RAZORPAY_KEY_ID: 'rzp_test_fixture',
   RAZORPAY_KEY_SECRET: 'fixture-secret',
   RAZORPAY_WEBHOOK_SECRET: 'fixture-webhook',
-  LUMORA_STORE_LIVE: 'true',
-  LUMORA_SHIPPING_INR: '49',
+  AURAFLARE_STORE_LIVE: 'true',
+  AURAFLARE_SHIPPING_INR: '49',
 }
 const customer = {
   name: 'Test Customer',
@@ -23,7 +23,7 @@ const customer = {
   postalCode: '682001',
 }
 const input = () => ({
-  items: [{ id: 'amber-hour', quantity: 1 }],
+  items: [{ id: 'jar', quantity: 1 }],
   customer: { ...customer },
   amount: 1,
 })
@@ -42,7 +42,7 @@ function fixture(t, payment = {}) {
       json: async () => ({
         id: 'pay_fixture',
         order_id: 'order_fixture',
-        amount: 94800,
+        amount: 69800,
         currency: 'INR',
         status: 'captured',
         ...payment,
@@ -74,16 +74,32 @@ test('disabled checkout never calls the payment provider or accepts orders', asy
     (error) => error.status === 503,
   )
 })
+test('the new sample catalogue requires an explicit Auraflare live switch', (t) => {
+  const db = createDatabase(':memory:')
+  t.after(() => db.close())
+  const legacyEnv = { ...env, AURAFLARE_STORE_LIVE: undefined, LUMORA_STORE_LIVE: 'true' }
+  const store = createStore({ db, env: legacyEnv, request: () => assert.fail('No provider call expected') })
+  assert.equal(store.config().checkoutReady, false)
+  assert.deepEqual(
+    store.config().products.map(({ id, price }) => ({ id, price })),
+    [
+      { id: 'jar', price: 649 }, { id: 'pillars', price: 799 },
+      { id: 'bubble', price: 349 }, { id: 'violet', price: 599 },
+      { id: 'hearts', price: 449 }, { id: 'lotus', price: 549 },
+      { id: 'glass', price: 1199 }, { id: 'tealights', price: 299 },
+    ],
+  )
+})
 test('order amount uses catalog prices and configured delivery, ignoring browser prices', async (t) => {
   const { store, db, calls } = fixture(t)
   const order = await store.createOrder(input())
-  assert.equal(order.amount, 94800)
+  assert.equal(order.amount, 69800)
   assert.equal(order.currency, 'INR')
-  assert.equal(JSON.parse(calls[0].options.body).amount, 94800)
+  assert.equal(JSON.parse(calls[0].options.body).amount, 69800)
   const saved = db.prepare('SELECT * FROM orders').get()
   assert.equal(saved.status, 'created')
   assert.equal(JSON.parse(saved.customer).postalCode, '682001')
-  assert.equal(JSON.parse(saved.items)[0].unitPrice, 89900)
+  assert.equal(JSON.parse(saved.items)[0].unitPrice, 64900)
   assert.equal(JSON.stringify(store.config()).includes('fixture-secret'), false)
 })
 test('invalid, duplicated, fractional, or excessive quantities are rejected', async (t) => {
@@ -91,12 +107,12 @@ test('invalid, duplicated, fractional, or excessive quantities are rejected', as
   for (const items of [
     [],
     [{ id: 'unknown', quantity: 1 }],
-    [{ id: 'amber-hour', quantity: 0 }],
-    [{ id: 'amber-hour', quantity: 1.5 }],
-    [{ id: 'amber-hour', quantity: 100 }],
+    [{ id: 'jar', quantity: 0 }],
+    [{ id: 'jar', quantity: 1.5 }],
+    [{ id: 'jar', quantity: 100 }],
     [
-      { id: 'amber-hour', quantity: 1 },
-      { id: 'amber-hour', quantity: 1 },
+      { id: 'jar', quantity: 1 },
+      { id: 'jar', quantity: 1 },
     ],
   ])
     await assert.rejects(
@@ -190,7 +206,7 @@ test('authorized payments are captured with the stored amount', async (t) => {
         json: async () => ({
           id: 'pay_fixture',
           order_id: 'order_fixture',
-          amount: 94800,
+          amount: 69800,
           currency: 'INR',
           status: url.endsWith('/capture') ? 'captured' : 'authorized',
         }),
@@ -199,7 +215,7 @@ test('authorized payments are captured with the stored amount', async (t) => {
   })
   await store.createOrder(input())
   assert.equal((await store.verifyPayment(paymentBody())).status, 'paid')
-  assert.equal(captureAmount, 94800)
+  assert.equal(captureAmount, 69800)
 })
 test('failed capture is not reported as a successful payment', async (t) => {
   const db = createDatabase(':memory:')
@@ -222,7 +238,7 @@ test('failed capture is not reported as a successful payment', async (t) => {
         json: async () => ({
           id: 'pay_fixture',
           order_id: 'order_fixture',
-          amount: 94800,
+          amount: 69800,
           currency: 'INR',
           status: 'authorized',
         }),
@@ -247,7 +263,7 @@ test('webhooks require a valid raw-body signature and are idempotent', async (t)
           entity: {
             id: 'pay_fixture',
             order_id: 'order_fixture',
-            amount: 94800,
+            amount: 69800,
             currency: 'INR',
             status: 'captured',
           },
@@ -289,20 +305,20 @@ test('provider failure does not create a local order', async (t) => {
   )
 })
 test('order records survive reopening the database', async (t) => {
-  const folder = mkdtempSync(join(tmpdir(), 'lumora-orders-'))
+  const folder = mkdtempSync(join(tmpdir(), 'auraflare-orders-'))
   t.after(() => rmSync(folder, { recursive: true, force: true }))
   const filename = join(folder, 'orders.sqlite')
   const db = createDatabase(filename)
   db.prepare(
     'INSERT INTO orders (id,receipt,amount,currency,items,customer) VALUES (?,?,?,?,?,?)',
-  ).run('order_saved', 'receipt', 89900, 'INR', '[]', '{}')
+  ).run('order_saved', 'receipt', 64900, 'INR', '[]', '{}')
   db.close()
   const restored = createDatabase(filename)
   assert.equal(
     restored
       .prepare('SELECT amount FROM orders WHERE id = ?')
       .get('order_saved').amount,
-    89900,
+    64900,
   )
   restored.close()
 })

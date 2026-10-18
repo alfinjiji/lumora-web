@@ -32,19 +32,19 @@ export function validSignature(payload, signature, secret) {
 }
 
 export function createStore({ db, env = process.env, request = fetch }) {
-  const shipping = Number(env.LUMORA_SHIPPING_INR || '0')
+  const shipping = Number(env.AURAFLARE_SHIPPING_INR ?? env.LUMORA_SHIPPING_INR ?? '0')
   if (
     !Number.isFinite(shipping) ||
     shipping < 0 ||
     shipping > 10000 ||
     !Number.isInteger(shipping * 100)
   )
-    throw new Error('Invalid LUMORA_SHIPPING_INR')
+    throw new Error('Invalid AURAFLARE_SHIPPING_INR')
   const shippingPaise = Math.round(shipping * 100)
   const ready = Boolean(
     env.RAZORPAY_KEY_ID &&
     env.RAZORPAY_KEY_SECRET &&
-    env.LUMORA_STORE_LIVE === 'true',
+    env.AURAFLARE_STORE_LIVE === 'true',
   )
   const requireReady = () => {
     if (!ready)
@@ -177,7 +177,7 @@ export function createStore({ db, env = process.env, request = fetch }) {
           400,
           'This order is too large for online checkout.',
         )
-      const receipt = `lum_${randomUUID().replaceAll('-', '').slice(0, 24)}`
+      const receipt = `aur_${randomUUID().replaceAll('-', '').slice(0, 24)}`
       const order = await api('/orders', {
         method: 'POST',
         body: JSON.stringify({ amount, currency: 'INR', receipt }),

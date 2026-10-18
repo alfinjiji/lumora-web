@@ -178,7 +178,7 @@ export default function Checkout({
         key: order.keyId,
         amount: order.amount,
         currency: order.currency,
-        name: 'Lumora',
+        name: 'Auraflare',
         description: 'Your candle collection',
         order_id: order.id,
         prefill: {
@@ -186,7 +186,7 @@ export default function Checkout({
           email: customer.email,
           contact: customer.phone,
         },
-        theme: { color: '#b78344' },
+        theme: { color: '#641d35' },
         handler: (result) => {
           void verify(result)
         },

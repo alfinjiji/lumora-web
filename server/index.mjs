@@ -4,7 +4,7 @@ import { resolve, extname, sep } from 'node:path'
 import { createDatabase, createStore, StoreError } from './store.mjs'
 
 const db = createDatabase(
-  resolve(process.env.LUMORA_DATA_DIR || '.data', 'orders.sqlite'),
+  resolve(process.env.AURAFLARE_DATA_DIR || process.env.LUMORA_DATA_DIR || '.data', 'orders.sqlite'),
 )
 const store = createStore({ db })
 const dist = resolve('dist')
@@ -51,7 +51,7 @@ const server = createServer(async (request, response) => {
         )
       const origin = request.headers.origin
       if (origin && new URL(origin).host !== request.headers.host)
-        throw new StoreError(403, 'Use checkout from the Lumora website.')
+        throw new StoreError(403, 'Use checkout from the Auraflare website.')
       if (!request.headers['content-type']?.startsWith('application/json'))
         throw new StoreError(415, 'JSON body is required.')
       if (pathname === '/api/orders') {
@@ -97,7 +97,11 @@ const server = createServer(async (request, response) => {
       '.js': 'text/javascript',
       '.css': 'text/css',
       '.svg': 'image/svg+xml',
+      '.ttf': 'font/ttf',
+      '.json': 'application/json; charset=utf-8',
+      '.txt': 'text/plain; charset=utf-8',
       '.png': 'image/png',
+      '.webp': 'image/webp',
       '.woff2': 'font/woff2',
     }
     response.writeHead(200, {
@@ -119,7 +123,7 @@ const server = createServer(async (request, response) => {
 })
 server.listen(Number(process.env.PORT || 3001), '0.0.0.0', () =>
   console.log(
-    'Lumora store server ready on port',
+    'Auraflare store server ready on port',
     Number(process.env.PORT || 3001),
     '— checkout',
     store.config().checkoutReady ? 'enabled' : 'disabled',

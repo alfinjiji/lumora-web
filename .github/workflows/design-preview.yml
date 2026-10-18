@@ -1,4 +1,4 @@
-name: Publish Lumora design preview
+name: Publish Auraflare design preview
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: lumora-design-preview
+  group: auraflare-design-preview
   cancel-in-progress: true
 
 jobs:
