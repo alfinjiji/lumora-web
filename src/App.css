@@ -63,6 +63,26 @@ header nav{border:0;background:transparent}
 @media(max-width:650px){.opening-mark{animation-duration:1s}.opening-mark span{animation-duration:.65s}}
 @media(prefers-reduced-motion:reduce){.intro-active{overflow:auto}.quote-character{opacity:1;animation:none}.opening-mark,.opening-mark span{animation:none;transform:none;opacity:1;will-change:auto}}
 
+/* Auraflare typography: expressive display serif, clear shopping UI. */
+:root{--serif:'Cormorant Garamond',Georgia,'Times New Roman',serif;--sans:'DM Sans',Arial,sans-serif}
+body{font-family:var(--sans);font-weight:400}
+button,input,select,textarea{font-family:var(--sans)}
+h1,h2,h3,.brand,.opening-mark,.footer-note,.handwritten,.photo-label,.ribbon{font-family:var(--serif)}
+h1,h2,.brand,.opening-mark{font-weight:500;letter-spacing:-.025em}
+h3,.product h3,.cart-item h3{font-weight:600;letter-spacing:-.015em}
+.hero-copy h1{font-weight:500;letter-spacing:-.025em}
+h2 em,h1 em{font-weight:500}
+.product h3{font-size:23px;line-height:1.12}
+header .brand,footer .brand{font-weight:500;letter-spacing:-.035em}
+.opening-mark{font-weight:500;letter-spacing:-.035em}
+.opening-quote{font-weight:500;letter-spacing:-.015em}
+nav,.bag,.price,.button,.filters button,.sort,.sample-note,.eyebrow,.brand small,.photo-label span,.footer-note small,.announcement,.hero-bottom,.footer-bottom{font-family:var(--sans)}
+nav,.bag,.price,.button{font-weight:500}
+.brand small,.photo-label span,.footer-note small{font-family:var(--sans)}
+.intro-pending body{background:var(--wine-deep)}
+@media(max-width:1000px){.hero-copy h1{letter-spacing:-.025em}}
+@media(max-width:650px){.hero-copy h1{letter-spacing:-.025em}.product h3{font-size:21px;line-height:1.15}.brand{letter-spacing:-.035em}}
+
 /* React integration: the approved page lives under the application root. */
 .intro-pending .page-content{visibility:hidden}
 #main:focus{outline:none}
@@ -80,3 +100,7 @@ button:disabled{cursor:not-allowed;opacity:.55}
 .checkout-pay{width:100%}.checkout-security{font-size:10px;color:var(--muted);line-height:1.8;margin-top:14px}
 @media(max-width:1000px){.shop-tools{flex-wrap:wrap}.sort{display:flex;align-items:center;gap:5px;margin-left:auto;padding-bottom:12px}}
 @media(max-width:650px){.toast{white-space:normal;text-align:center;min-width:min(300px,90vw)}.checkout-fields{grid-template-columns:1fr;gap:0}.sort{font-size:10px}.sort select{font-size:10px}.shop-tools{row-gap:0}}
+
+/* Keep the first brand frame still until the bounded font preparation finishes. */
+.opening-font-pending .opening-mark,.opening-font-pending .opening-mark span,.opening-font-pending .opening-kicker,.opening-font-pending .opening-footnote,.opening-font-pending .quote-character{animation-play-state:paused}
+.opening-font-pending .opening-mark,.opening-font-pending .opening-quote{visibility:hidden}

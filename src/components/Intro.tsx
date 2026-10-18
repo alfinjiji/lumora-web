@@ -10,12 +10,15 @@ declare global {
 }
 
 export default function Intro({ onFinish }: { onFinish(): void }) {
+  const [fontReady, setFontReady] = useState(false)
   const [leaving, setLeaving] = useState(false)
   const skip = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     const root = document.documentElement
     const media = window.matchMedia('(prefers-reduced-motion: reduce)')
+    let cancelled = false
+    let fontWait: number | undefined
     const timers: number[] = []
     const later = (callback: () => void, delay: number) =>
       timers.push(window.setTimeout(callback, delay))
@@ -42,14 +45,32 @@ export default function Intro({ onFinish }: { onFinish(): void }) {
     skip.current?.focus({ preventScroll: true })
     document.addEventListener('keydown', onKey)
     media.addEventListener('change', onMotion)
-    // Paint the page behind the opaque overlay before its slide begins.
-    later(() => root.classList.remove('intro-pending'), 3000)
-    later(() => {
-      setLeaving(true)
-      root.classList.add('entrance-visible')
-    }, 3300)
-    later(finish, 4150)
+    const begin = () => {
+      clearTimeout(fontWait)
+      if (cancelled) return
+      setFontReady(true)
+      // Paint the page behind the opaque overlay before its slide begins.
+      later(() => root.classList.remove('intro-pending'), 3000)
+      later(() => {
+        setLeaving(true)
+        root.classList.add('entrance-visible')
+      }, 3300)
+      later(finish, 4150)
+    }
+    // Match the prototype's bounded font head start; controls work while waiting.
+    const fonts = document.fonts
+      ? Promise.all([
+          document.fonts.load('500 48px "Cormorant Garamond"'),
+          document.fonts.load('italic 500 24px "Cormorant Garamond"'),
+        ])
+      : Promise.resolve()
+    Promise.race([
+      fonts,
+      new Promise<void>((resolve) => { fontWait = window.setTimeout(resolve, 700) }),
+    ]).then(begin, begin)
     return () => {
+      cancelled = true
+      clearTimeout(fontWait)
       timers.forEach(clearTimeout)
       document.removeEventListener('keydown', onKey)
       media.removeEventListener('change', onMotion)
@@ -60,7 +81,7 @@ export default function Intro({ onFinish }: { onFinish(): void }) {
   return (
     <section
       id="opening"
-      className={'opening-overlay' + (leaving ? ' opening-reveal' : '')}
+      className={'opening-overlay' + (!fontReady ? ' opening-font-pending' : '') + (leaving ? ' opening-reveal' : '')}
       role="dialog"
       aria-modal="true"
       aria-label="Auraflare introduction"

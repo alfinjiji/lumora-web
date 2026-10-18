@@ -1,7 +1,38 @@
 {
-  "family": "DM Sans",
-  "source": "https://github.com/google/fonts/tree/main/ofl/dmsans",
-  "license": "SIL Open Font License 1.1",
-  "file": "dm-sans.ttf",
-  "sha256": "8cd08d97e89c24d0aa92edd2f0f4c8ee6195eee9b7c9f154865a58b02f0c1c0d"
+  "fonts": [
+    {
+      "family": "DM Sans",
+      "source": "https://github.com/google/fonts/tree/main/ofl/dmsans",
+      "license": "SIL Open Font License 1.1",
+      "files": [
+        {
+          "file": "dm-sans.ttf",
+          "style": "normal",
+          "sha256": "8cd08d97e89c24d0aa92edd2f0f4c8ee6195eee9b7c9f154865a58b02f0c1c0d"
+        }
+      ]
+    },
+    {
+      "family": "Cormorant Garamond",
+      "source": "https://github.com/google/fonts/tree/main/ofl/cormorantgaramond",
+      "license": "SIL Open Font License 1.1",
+      "note": "Lossless WOFF2 packaging of official Google Fonts variable TTFs; full glyph coverage, normal/italic styles and 300\u2013700 weight axis retained. No subsetting.",
+      "files": [
+        {
+          "file": "cormorant-garamond.woff2",
+          "style": "normal",
+          "sha256": "2d82b4685f09f72d8543a3cba41fbc677c0fd22ef961f5c437499b8859ac2289",
+          "source_url": "https://raw.githubusercontent.com/google/fonts/main/ofl/cormorantgaramond/CormorantGaramond%5Bwght%5D.ttf",
+          "source_sha256": "b20b7d9626dd956b2c5e558692ad328b1f19e3275e2782db4fa07670d83f35e0"
+        },
+        {
+          "file": "cormorant-garamond-italic.woff2",
+          "style": "italic",
+          "sha256": "f18e5c0420535b80582cdd6e8244681aecf31a3c32874a8c59161efd84d59300",
+          "source_url": "https://raw.githubusercontent.com/google/fonts/main/ofl/cormorantgaramond/CormorantGaramond-Italic%5Bwght%5D.ttf",
+          "source_sha256": "0f48ea6abb2084537854f7174c470991a463b13036309e3b50a81511611c530d"
+        }
+      ]
+    }
+  ]
 }

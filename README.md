@@ -27,12 +27,12 @@ npm start
 The user-provided `Auraflare-Design-Codex-Reference.zip` is the authoritative reference. Its snapshot revision is `c13891a4c170e88013f5e034c967f083f9e1232c`. The legacy live reference is <https://stillwick-candle-studio.mailfordev97.chatgpt.site/>; the brand is **Auraflare**.
 
 - Full photographic hero, rounded image covers, compact sticky navigation and the source’s final burgundy CSS overrides.
-- Quote-first introduction on full loads (about 4.15 seconds, matching the updated prototype); skip, Escape, completion and footer replay. Reduced motion bypasses the introduction and disables decorative movement.
+- Quote-first introduction on full loads (about 4.15 seconds, matching the updated prototype); skip, Escape, completion and footer replay. Display fonts receive a bounded 700ms head start before the introduction to reduce font swaps; skip and Escape remain immediately available. Reduced motion bypasses the introduction and disables decorative movement.
 - Home, gifting and sculptural filters, featured/price sorting, product dialogs, quick-add, persistent bag, quantities/removal and INR subtotals. Price sorting also remains available on mobile.
 - Story, occasions, care FAQ, closing CTA and the supplied footer.
 - Demo checkout with explicit simulated completion; event enquiries are previews and send/store no form information.
 - Keyboard-operable native dialogs and focus indicators; the focused main landmark has no visible black outline.
-- Nine supplied WebP files are copied unchanged. Source/checksum metadata lives in `public/images/auraflare/SOURCES.json`. No new candle imagery was generated. DM Sans is self-hosted with its SIL Open Font License under `public/fonts/`.
+- Nine supplied WebP files are copied unchanged. Source/checksum metadata lives in `public/images/auraflare/SOURCES.json`. No new candle imagery was generated. The updated prototype’s Cormorant Garamond display face (normal and italic) and DM Sans UI face are self-hosted with their SIL Open Font Licenses under `public/fonts/`.
 
 The catalogue is illustrative. Confirm actual products, prices, materials, scents, dimensions, burn times, availability, shipping and business terms before accepting real orders. No inventory, customer accounts, newsletter service or email delivery is implied by the preview. The internal `stillwick-bag` storage key intentionally preserves the reference prototype’s bag format; old Lumora product IDs are not mapped to different products.
 
