@@ -104,3 +104,6 @@ button:disabled{cursor:not-allowed;opacity:.55}
 /* Keep the first brand frame still until the bounded font preparation finishes. */
 .opening-font-pending .opening-mark,.opening-font-pending .opening-mark span,.opening-font-pending .opening-kicker,.opening-font-pending .opening-footnote,.opening-font-pending .quote-character{animation-play-state:paused}
 .opening-font-pending .opening-mark,.opening-font-pending .opening-quote{visibility:hidden}
+
+/* Published copy and product names must remain within their frames. */
+.hero-copy h1,.hero-copy p,.product-info h3,#productDialog h2{overflow-wrap:anywhere;min-width:0}.hero-copy p{max-width:100%}

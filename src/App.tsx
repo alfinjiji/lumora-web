@@ -4,7 +4,7 @@ import Checkout from './components/Checkout'
 import Intro from './components/Intro'
 import Modal from './components/Modal'
 import useStoreMotion from './useStoreMotion'
-import { products, formatPrice } from './products'
+import { products as seedProducts, formatPrice } from './products'
 import type { Category, Product } from './products'
 import './App.css'
 
@@ -17,15 +17,15 @@ function readBag(): Bag {
   try {
     const saved: unknown = JSON.parse(localStorage.getItem(bagKey) || '{}')
     if (!saved || typeof saved !== 'object' || Array.isArray(saved)) return {}
-    return Object.fromEntries(products.flatMap((product) => {
-      const value = (saved as Record<string, unknown>)[product.id]
-      return typeof value === 'number' && Number.isInteger(value) && value > 0 && value <= 99
-        ? [[product.id, value]] : []
-    }))
+    return Object.fromEntries(Object.entries(saved).filter(([id, value]) => /^[a-zA-Z0-9_-]{1,100}$/.test(id) && typeof value === 'number' && Number.isInteger(value) && value > 0 && value <= 99))
   } catch { return {} }
 }
 
 export default function App() {
+  const [products, setProducts] = useState<Product[]>(seedProducts)
+  const [websiteContent, setWebsiteContent] = useState<{headline:string;subtitle:string;announcement:string;button:string;image:string;featured:string}|null>(null)
+  const [variantId, setVariantId] = useState('')
+  const cartProducts = products.flatMap(p => p.variants?.length ? p.variants.map(v => ({...p,id:v.id,price:v.price,note:v.name})) : [p])
   const [category, setCategory] = useState<Category | 'All'>('All')
   const [sort, setSort] = useState<Sort>('featured')
   const [cart, setCart] = useState<Bag>(readBag)
@@ -46,7 +46,7 @@ export default function App() {
   const [receipt, setReceipt] = useState('')
   const eventForm = useRef<HTMLFormElement>(null)
   const count = Object.values(cart).reduce((sum, quantity) => sum + quantity, 0)
-  const subtotal = products.reduce((sum, item) => sum + item.price * (cart[item.id] || 0), 0)
+  const subtotal = cartProducts.reduce((sum, item) => sum + item.price * (cart[item.id] || 0), 0)
   const visibleProducts = products.filter((item) => category === 'All' || item.category.includes(category))
   if (sort !== 'featured') visibleProducts.sort((a, b) => sort === 'low' ? a.price - b.price : b.price - a.price)
   useStoreMotion(category, sort)
@@ -58,7 +58,16 @@ export default function App() {
   useEffect(() => {
     const controller = new AbortController()
     fetch('/api/store', { signal: controller.signal }).then(async (response) => {
-      if (response.ok) setCheckoutReady((await response.json()).checkoutReady === true)
+      if (response.ok) {
+        const config = await response.json()
+        setCheckoutReady(config.checkoutReady === true)
+        if(Array.isArray(config.products)) {
+          setProducts(config.products)
+          const ids = new Set(config.products.flatMap((p:Product) => p.variants?.length ? p.variants.map(v => v.id) : [p.id]))
+          setCart(saved => Object.fromEntries(Object.entries(saved).filter(([id]) => ids.has(id))))
+        }
+        if(config.content) {setWebsiteContent(config.content);if(['All','Home','Gifting','Sculptural'].includes(config.content.featured))setCategory(config.content.featured)}
+      }
     }).catch(() => { /* The supplied demo checkout remains available without a backend. */ })
     return () => controller.abort()
   }, [])
@@ -83,7 +92,7 @@ export default function App() {
     toastTimer.current = window.setTimeout(() => { setToast(''); setLastAdded('') }, 2600)
   }
   const add = (id: string) => {
-    if (!products.some((item) => item.id === id)) return
+    if (!cartProducts.some((item) => item.id === id)) return
     if ((cart[id] || 0) >= 99) { notify('Maximum 99 per item in this preview'); return }
     setCart((saved) => ({ ...saved, [id]: Math.min(99, (saved[id] || 0) + 1) }))
     setLastAdded(id)
@@ -115,7 +124,7 @@ export default function App() {
     if (element.dataset.add) { add(element.dataset.add); return }
     if (element.dataset.product) {
       const selected = products.find((item) => item.id === element.dataset.product)
-      if (selected) { setProduct(selected); setModal('product') }
+      if (selected) { setProduct(selected); setVariantId(selected.variants?.[0]?.id || selected.id); setModal('product') }
       return
     }
     const filter = element.dataset.filter || element.dataset.category
@@ -131,7 +140,7 @@ export default function App() {
   }
   const close = () => setModal(null)
   const beginCheckout = () => {
-    setCheckoutItems(products.filter((item) => cart[item.id]).map((item) => ({ id: item.id, quantity: cart[item.id] })))
+    setCheckoutItems(cartProducts.filter((item) => cart[item.id]).map((item) => ({ id: item.id, quantity: cart[item.id] })))
     setCheckoutSubtotal(subtotal)
     setCheckoutMode(checkoutReady ? 'payment' : 'demo')
     setPaymentWindowOpen(false)
@@ -150,8 +159,8 @@ export default function App() {
       <div className="page-content" inert={introActive} onClick={handlePageClick}>
 
 <a className="skip" href="#main">Skip to content</a>
-<div className="announcement">A LITTLE LIGHT. A LITTLE LESS HURRY. <span>Discover your everyday ritual ↗</span>
-</div>
+{websiteContent?.announcement !== '' && <div className="announcement">{websiteContent?.announcement ?? 'A LITTLE LIGHT. A LITTLE LESS HURRY.'} <span>Discover your everyday ritual ↗</span>
+</div>}
 
 <header><a className="brand" href="#">Auraflare<span className="brand-flame">◒</span>
 <small>THE CANDLE STUDIO</small>
@@ -169,10 +178,9 @@ export default function App() {
 
 <main id="main" tabIndex={-1}><section className="hero"><div className="hero-copy"><div className="eyebrow"><span className="line"></span>
  FOR THE BEAUTY OF EVERYDAY</div>
-<h1>A little light.<br />A <em>slower</em>
-<br />moment.</h1>
-<p>Candles for quiet evenings, thoughtful gifts,<br className="desktop" /> and the moments you want to hold onto.</p>
-<a className="button" href="#collection">Find your glow <span>↗</span>
+<h1>{!websiteContent || websiteContent.headline === 'A little light. A slower moment.' ? <>A little light.<br />A <em>slower</em><br />moment.</> : websiteContent.headline}</h1>
+<p>{!websiteContent || websiteContent.subtitle === 'Candles for quiet evenings, thoughtful gifts, and the moments you want to hold onto.' ? <>Candles for quiet evenings, thoughtful gifts,<br className="desktop" /> and the moments you want to hold onto.</> : websiteContent.subtitle}</p>
+<a className="button" href="#collection">{websiteContent?.button ?? 'Find your glow'} <span>↗</span>
 </a>
 <a className="text-link" href="#occasions">Something for a special occasion? <span>→</span>
 </a>
@@ -180,7 +188,7 @@ export default function App() {
 <span>SCROLL TO SLOW DOWN ↓</span>
 </div>
 </div>
-<div className="hero-photo"><img src="/images/auraflare/hero.webp" alt="Glowing jar, bubble and flower candles surrounded by delicate white flowers" fetchPriority="high" /><div className="photo-label">The art of a softer evening.<span>01 / THE EVERYDAY RITUAL</span>
+<div className="hero-photo"><img src={websiteContent?.image || '/images/auraflare/hero.webp'} alt="Auraflare candle studio campaign" fetchPriority="high" /><div className="photo-label">The art of a softer evening.<span>01 / THE EVERYDAY RITUAL</span>
 </div>
 <div className="seal">little things<br /><i>lovely</i>
 <br />moments</div>
@@ -214,7 +222,7 @@ export default function App() {
 </label>
 </div>
 <div className="products" id="products">{visibleProducts.map((item) => <article className="product" key={item.id}>
-<div className="product-photo"><button className="product-open" data-product={item.id} aria-label={'View ' + item.name}><img src={item.image} alt={item.name + ', ' + item.note} loading="lazy" decoding="async" /><span className="badge">{item.tag}</span></button><button className="quick-add" data-add={item.id} aria-label={'Add ' + item.name + ' to bag'}>+</button></div>
+<div className="product-photo"><button className="product-open" data-product={item.id} aria-label={'View ' + item.name}><img src={item.image} alt={item.name + ', ' + item.note} loading="lazy" decoding="async" /><span className="badge">{item.tag}</span></button><button className="quick-add" data-add={item.variants?.[0]?.id || item.id} aria-label={'Add ' + item.name + ' to bag'}>+</button></div>
 <button className="product-open" data-product={item.id}><div className="product-info"><h3>{item.name}</h3><span className="price">{formatPrice(item.price)}</span></div><p>{item.note}</p></button></article>)}</div><p className="sample-note">A curated preview · Product names and prices are illustrative.</p>
 </section>
 
@@ -317,10 +325,10 @@ export default function App() {
           <img src={product.image} alt={product.name} />
           <div className="detail-copy">
             <div className="eyebrow">{product.tag}</div><h2>{product.name}</h2>
-            <p>{product.description}</p><p className="detail-price">{formatPrice(product.price)}</p>
-            <label>Style<select aria-label="Candle style" defaultValue={product.note}><option>{product.note}</option></select></label>
+            <p>{product.description}</p><p className="detail-price">{formatPrice(product.variants?.find(v=>v.id===variantId)?.price || product.price)}</p>
+            <label>Style<select aria-label="Candle style" value={variantId || product.id} onChange={e=>setVariantId(e.target.value)}>{product.variants?.length ? product.variants.map(v=><option key={v.id} value={v.id}>{v.name} · {formatPrice(v.price)}</option>) : <option value={product.id}>{product.note}</option>}</select></label>
             <p>For your home, or someone you love.</p>
-            <button className="button" onClick={() => add(product.id)}>{lastAdded === product.id ? 'Added to bag' : 'Add to bag'} <span>{lastAdded === product.id ? '✓' : '+'}</span></button>
+            <button className="button" onClick={() => add(variantId || product.id)}>{lastAdded === (variantId || product.id) ? 'Added to bag' : 'Add to bag'} <span>{lastAdded === (variantId || product.id) ? '✓' : '+'}</span></button>
             <p className="sample-note">Concept product · Sample price. Materials, scent, size and burn time will be added to the final catalogue.</p>
             <details><summary>Candle care</summary><p>Always use a stable, heat-resistant surface. Never leave a burning candle unattended. Keep away from children, pets and flammable materials.</p></details>
           </div>
@@ -330,7 +338,7 @@ export default function App() {
         <div className="dialog-head"><h2>Your <em>bag.</em></h2><button className="close" aria-label="Close bag" onClick={close}>×</button></div>
         {count ? <>
           <p className="sample-note">A little collection of lovely things.</p>
-          {products.filter((item) => cart[item.id]).map((item) => <div className="cart-item" key={item.id}>
+          {cartProducts.filter((item) => cart[item.id]).map((item) => <div className="cart-item" key={item.id}>
             <img src={item.image} alt={item.name} />
             <div><h3>{item.name}</h3><small>{item.note}</small><div className="qty">
               <button onClick={() => changeQuantity(item.id, -1)} aria-label={'Decrease ' + item.name + ' quantity'}>−</button>
@@ -361,7 +369,7 @@ export default function App() {
           <div className="eyebrow">ONE LAST LITTLE STEP</div><h2>Bring the <em>glow</em> home.</h2>
           {checkoutMode === 'demo' && <div className="demo-banner">Demo checkout · No order is placed, no payment is collected, and no personal details are saved. Use sample details to explore.</div>}
           <div className="checkout-summary">
-            {checkoutItems.map((item) => <div key={item.id}>{products.find((candle) => candle.id === item.id)!.name} × {item.quantity} — {formatPrice(products.find((candle) => candle.id === item.id)!.price * item.quantity)}</div>)}
+            {checkoutItems.map((item) => <div key={item.id}>{cartProducts.find((candle) => candle.id === item.id)!.name} × {item.quantity} — {formatPrice(cartProducts.find((candle) => candle.id === item.id)!.price * item.quantity)}</div>)}
             <div className="cart-total"><span>{checkoutMode === 'demo' ? 'Demo subtotal' : 'Subtotal'}</span><strong>{formatPrice(checkoutSubtotal)}</strong></div>
             {checkoutMode === 'demo' && 'Shipping & taxes: confirmed in the live store'}
           </div>

@@ -12,6 +12,7 @@ dist
 dist-ssr
 lumora-preview.html
 auraflare-preview.html
+auraflare-admin-preview.html
 *.local
 
 # Editor directories and files

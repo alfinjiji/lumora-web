@@ -1,5 +1,5 @@
 export type Category = 'Home' | 'Gifting' | 'Sculptural'
-export type Product = {id:string;name:string;price:number;image:string;category:Category[];tag:string;note:string;description:string}
+export type Product = {id:string;name:string;price:number;image:string;category:Category[];tag:string;note:string;description:string;variants?:{id:string;name:string;price:number;stock:number}[]}
 
 // Approved reference sample catalogue. Confirm inventory and prices before enabling sales.
 export const products:Product[]=[
@@ -13,4 +13,4 @@ export const products:Product[]=[
 {id:'tealights',name:'Floating Moments',price:299,image:'/images/auraflare/tealights.webp',category:['Home','Gifting'],tag:'CELEBRATION EDIT',note:'Tealight collection',description:'Small pools of light to make a gathering feel intimate. A simple way to bring warmth to a carefully styled table.'}
 ]
 
-export const formatPrice=(value:number)=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(value)
+export const formatPrice=(value:number)=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:Number.isInteger(value)?0:2,minimumFractionDigits:Number.isInteger(value)?0:2}).format(value)

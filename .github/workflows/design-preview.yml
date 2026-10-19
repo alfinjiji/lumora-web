@@ -25,11 +25,15 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci --no-audit --no-fund
+      - run: npm run lint
+      - run: npm test
       - run: npm run build
       - name: Export the interactive design review
         run: |
           mkdir -p review-pages
           node scripts/export-preview.mjs review-pages/index.html
+          node scripts/export-preview.mjs review-pages/admin-preview.html --admin
+          node scripts/export-preview.mjs review-pages/admin.html --admin-login
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

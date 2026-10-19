@@ -15,11 +15,14 @@
     "dev:client": "vite",
     "server": "node --env-file-if-exists=.env.local server/index.mjs",
     "start": "node --env-file-if-exists=.env.local server/index.mjs",
-    "test": "node --test server/*.test.mjs"
+    "test": "node --test server/*.test.mjs",
+    "admin:setup": "node --env-file-if-exists=.env.local scripts/admin-account.mjs",
+    "admin:reset": "node --env-file-if-exists=.env.local scripts/admin-account.mjs --reset"
   },
   "dependencies": {
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "sharp": "0.35.5"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

@@ -31,8 +31,15 @@ export function validSignature(payload, signature, secret) {
   return timingSafeEqual(expected, Buffer.from(signature, 'hex'))
 }
 
-export function createStore({ db, env = process.env, request = fetch }) {
-  const shipping = Number(env.AURAFLARE_SHIPPING_INR ?? env.LUMORA_SHIPPING_INR ?? '0')
+export function createStore({
+  db,
+  env = process.env,
+  request = fetch,
+  catalog,
+}) {
+  const shipping = Number(
+    env.AURAFLARE_SHIPPING_INR ?? env.LUMORA_SHIPPING_INR ?? '0',
+  )
   if (
     !Number.isFinite(shipping) ||
     shipping < 0 ||
@@ -43,8 +50,8 @@ export function createStore({ db, env = process.env, request = fetch }) {
   const shippingPaise = Math.round(shipping * 100)
   const ready = Boolean(
     env.RAZORPAY_KEY_ID &&
-    env.RAZORPAY_KEY_SECRET &&
-    env.AURAFLARE_STORE_LIVE === 'true',
+      env.RAZORPAY_KEY_SECRET &&
+      env.AURAFLARE_STORE_LIVE === 'true',
   )
   const requireReady = () => {
     if (!ready)
@@ -109,7 +116,8 @@ export function createStore({ db, env = process.env, request = fetch }) {
         keyId: ready ? env.RAZORPAY_KEY_ID : null,
         currency: 'INR',
         shippingPaise,
-        products,
+        products: catalog ? catalog.publicProducts() : products,
+        ...(catalog ? { content: catalog.published() } : {}),
       }
     },
     async createOrder(body) {
@@ -117,12 +125,21 @@ export function createStore({ db, env = process.env, request = fetch }) {
       if (
         !Array.isArray(body.items) ||
         !body.items.length ||
-        body.items.length > products.length
+        body.items.length > 30
       )
         throw new StoreError(400, 'Choose at least one candle.')
       const seen = new Set()
       const items = body.items.map((item) => {
-        const product = products.find((product) => product.id === item?.id)
+        const variant = catalog?.lookup(item?.id)
+        const product = catalog
+          ? variant && variant.status === 'Active'
+            ? {
+                id: variant.id,
+                name: variant.product_name,
+                price: variant.price / 100,
+              }
+            : null
+          : products.find((product) => product.id === item?.id)
         if (
           !product ||
           seen.has(item.id) ||
@@ -178,30 +195,42 @@ export function createStore({ db, env = process.env, request = fetch }) {
           'This order is too large for online checkout.',
         )
       const receipt = `aur_${randomUUID().replaceAll('-', '').slice(0, 24)}`
-      const order = await api('/orders', {
-        method: 'POST',
-        body: JSON.stringify({ amount, currency: 'INR', receipt }),
-      })
-      if (
-        typeof order.id !== 'string' ||
-        !/^order_[A-Za-z0-9]+$/.test(order.id) ||
-        order.amount !== amount ||
-        order.currency !== 'INR'
-      )
-        throw new StoreError(
-          502,
-          'The payment service returned an invalid order.',
+      catalog?.reserve(items, receipt)
+      let order
+      try {
+        order = await api('/orders', {
+          method: 'POST',
+          body: JSON.stringify({ amount, currency: 'INR', receipt }),
+        })
+        if (
+          typeof order.id !== 'string' ||
+          !/^order_[A-Za-z0-9]+$/.test(order.id) ||
+          order.amount !== amount ||
+          order.currency !== 'INR'
         )
-      db.prepare(
-        'INSERT INTO orders (id, receipt, amount, currency, items, customer) VALUES (?, ?, ?, ?, ?, ?)',
-      ).run(
-        order.id,
-        receipt,
-        amount,
-        'INR',
-        JSON.stringify(items),
-        JSON.stringify(customer),
-      )
+          throw new StoreError(
+            502,
+            'The payment service returned an invalid order.',
+          )
+        const persist = () => {
+          db.prepare(
+            'INSERT INTO orders (id, receipt, amount, currency, items, customer) VALUES (?, ?, ?, ?, ?, ?)',
+          ).run(
+            order.id,
+            receipt,
+            amount,
+            'INR',
+            JSON.stringify(items),
+            JSON.stringify(customer),
+          )
+          catalog?.attachOrder(order.id)
+        }
+        if (catalog) catalog.persistOrder(persist)
+        else persist()
+      } catch (error) {
+        catalog?.release(receipt)
+        throw error
+      }
       return {
         id: order.id,
         amount,

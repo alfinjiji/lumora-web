@@ -2,11 +2,21 @@ import { createServer } from 'node:http'
 import { existsSync, readFileSync, statSync } from 'node:fs'
 import { resolve, extname, sep } from 'node:path'
 import { createDatabase, createStore, StoreError } from './store.mjs'
+import { createCatalog } from './admin-db.mjs'
+import { createAdminHandler } from './admin.mjs'
 
 const db = createDatabase(
-  resolve(process.env.AURAFLARE_DATA_DIR || process.env.LUMORA_DATA_DIR || '.data', 'orders.sqlite'),
+  resolve(
+    process.env.AURAFLARE_DATA_DIR || process.env.LUMORA_DATA_DIR || '.data',
+    'orders.sqlite',
+  ),
 )
-const store = createStore({ db })
+const dataDir = resolve(
+  process.env.AURAFLARE_DATA_DIR || process.env.LUMORA_DATA_DIR || '.data',
+)
+const catalog = createCatalog(db)
+const store = createStore({ db, catalog })
+const admin = createAdminHandler({ db, catalog, dataDir })
 const dist = resolve('dist')
 const rateLimits = new Map()
 const json = (response, status, data) => {
@@ -30,6 +40,21 @@ async function readBody(request) {
 const server = createServer(async (request, response) => {
   try {
     const pathname = new URL(request.url, 'http://localhost').pathname
+    if (pathname.startsWith('/api/admin/'))
+      return await admin.handle(request, response, pathname)
+    if (
+      request.method === 'GET' &&
+      /^\/media\/[a-f0-9-]+\.webp$/.test(pathname)
+    ) {
+      const media = resolve(dataDir, 'media', pathname.slice(7))
+      if (!existsSync(media)) throw new StoreError(404, 'Image not found.')
+      response.writeHead(200, {
+        'Content-Type': 'image/webp',
+        'X-Content-Type-Options': 'nosniff',
+        'Cache-Control': 'public, max-age=86400',
+      })
+      return response.end(readFileSync(media))
+    }
     if (pathname.startsWith('/api/')) {
       if (request.method === 'GET' && pathname === '/api/health')
         return json(response, 200, {
@@ -87,7 +112,9 @@ const server = createServer(async (request, response) => {
     let file = resolve(dist, `.${decodeURIComponent(pathname)}`)
     if (!file.startsWith(`${dist}${sep}`) && file !== dist)
       return json(response, 404, { error: 'Not found.' })
-    if (file === dist || !extname(file)) file = resolve(dist, 'index.html')
+    if (pathname === '/admin' || pathname.startsWith('/admin/'))
+      file = resolve(dist, 'admin.html')
+    else if (file === dist || !extname(file)) file = resolve(dist, 'index.html')
     if (!existsSync(file) || !statSync(file).isFile())
       return json(response, 404, {
         error: 'Not found. Run npm run build to prepare the website.',
@@ -107,6 +134,9 @@ const server = createServer(async (request, response) => {
     response.writeHead(200, {
       'Content-Type': types[extname(file)] || 'application/octet-stream',
       'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'Referrer-Policy': pathname === '/admin' || pathname.startsWith('/admin/') || pathname === '/admin.html' ? 'no-referrer' : 'strict-origin-when-cross-origin',
+      ...(pathname === '/admin' || pathname.startsWith('/admin/') || pathname === '/admin.html' ? { 'Content-Security-Policy': "default-src 'self'; img-src 'self' data: blob:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'" } : {}),
       'Cache-Control': pathname.startsWith('/assets/')
         ? 'public, max-age=31536000, immutable'
         : 'no-cache',

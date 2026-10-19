@@ -73,3 +73,50 @@ node scripts/export-preview.mjs
 This writes ignored `auraflare-preview.html`; an explicit output path may be supplied. Images, CSS, JavaScript, favicon and font are embedded. Demo checkout stays functional, while real payment/order API calls are disabled. Credits and source metadata are included. The managed browser may block direct `file:` navigation; validate the exported HTML through a local HTTP server rather than bypassing browser policy.
 
 A full commerce deployment requires the Node backend, provider configuration and persistent storage. GitHub Pages hosts the interactive design review only.
+
+## Studio administration
+
+The attached `Auraflare-Admin-Codex-Reference.zip` is the admin design reference. The React admin is a separate Vite entry at **`/admin`** (`admin.html`), with isolated styles. The existing storefront remains the public entry. The Node server owns all authentication, permissions and writes; the prototype's sample-credential login and localStorage database are not used.
+
+### First owner and recovery
+
+Use the same Node application and database as the store. For local development:
+
+```bash
+npm run dev -- --host 0.0.0.0 --port 5173 --strictPort
+# In a second terminal:
+npm run admin:setup
+```
+
+The setup command asks for the owner's email/name and creates a pending owner only when no users exist. It writes a **private HTML invitation preview** under `.data/invitation-previews/` and prints its file path, not the token. Open that file locally and follow its single-use setup link to choose a 12–128 character password. No email is sent and no default credentials exist. Do not commit/share that file or its link in chat.
+
+For production, set **`AURAFLARE_PUBLIC_URL`** to the actual HTTPS application origin before running setup or issuing invitations. Configure the reverse proxy to serve the Node app over HTTPS, use `NODE_ENV=production`, protect/persist the entire data directory, then run `npm ci`, `npm run build`, `npm start`. The default local setup URL is `http://localhost:5173`; configure the origin when using another address. Session cookies are HttpOnly, SameSite=Strict and Secure for a configured HTTPS origin / production mode. Mutations check the request origin, a custom request header and a session CSRF token.
+
+Owners invite staff/owners from Team & access. Each invitation opens a reviewable email preview and a copyable private setup link; delivery is deliberately not configured. Setup links expire after 72 hours and work once. Owners can create one-hour recovery links for active accounts. A server operator can also run `npm run admin:reset` for account recovery. Reset/setup tokens and session identifiers are stored as hashes; passwords use salted scrypt hashes. Deactivation and password changes revoke sessions. The final usable active owner cannot be deactivated or demoted, including when another owner invitation is pending. Email identifiers are read-only because email-change verification is not configured.
+
+### Records and permissions
+
+- **Owners:** all studio operations, product pricing/variants, publishing and account management.
+- **Fulfilment staff:** view products, create/manage orders, record shipment/tracking information, adjust stock with reasons, manage internal enquiries and update their own profile. They cannot change prices, publish content, manage accounts or record manual payments. These restrictions are enforced on protected server endpoints.
+- **Overview:** actual records, INR, 7/30 calendar-day reporting in Asia/Kolkata. Gross receipts are paid orders created in the selected period, including owner-recorded direct receipts; refunds are not deducted. No sample revenue/customers/orders are seeded into the live database.
+- **Catalogue:** the existing eight storefront products migrate into management, with stable default variant IDs. Available stock starts at zero until an initial count is entered. Owners manage categories, collections, descriptions/scent notes, images, SKU, variants, paise prices and active/draft states. Drafts stay out of the public catalogue. Stock history records adjustments and order reservations/releases.
+- **Orders:** website Razorpay records and direct WhatsApp/Instagram/phone/in-person orders share the original `orders` table. Direct-order creation uses server prices, reserves stock transactionally and supports idempotent retries. Website checkout also reserves available stock and releases reservations if provider creation fails. Do not enable sales until stock and business terms are confirmed. Abandoned unpaid reservations need studio review/cancellation; automatic reservation expiry is not implemented.
+- **Payments/shipping:** website payment confirmation remains exclusively verified by Razorpay. Owners can record an already-received direct cash/bank payment with its exact amount and receipt reference; it is a manual ledger event. Fulfilment cannot progress without payment, and shipment requires carrier/tracking details. Recording shipment does not book a carrier or send a message. Cancellation releases reserved stock once. Refunds must be handled in the payment provider; no refund or carrier-booking service is claimed.
+- **Enquiries:** persist contact/channel, assignment, internal notes and follow-up states. No customer messages are sent. The public storefront's explicitly simulated enquiry form remains a demonstration; it does not silently begin collecting personal data.
+- **Website content:** draft and published hero copy, announcement, button label, featured category and campaign image. Saving a draft does not change the public site. Publishing updates `/api/store` and the storefront served by this Node instance. Static design reviews use the bundled sample catalogue/copy and do not consume live CMS or database changes.
+- **Photos:** server-validated still JPEG/PNG/WebP, up to 2 MB for avatars and 5 MB for product/banner uploads; decoded with a pixel limit, stripped/re-encoded as WebP and resized. Avatars use authenticated delivery; product/banner media uses public `/media/<uuid>.webp` URLs. Avatar details and personal form data are not stored in localStorage.
+
+Admin tables are added transactionally and idempotently in the **same existing SQLite database** (`studio_migrations` version 1); existing order rows/payment references are preserved. Do not create a separate database or delete/reset `.data`. Back up the SQLite database and uploaded media together. This deployment uses one Node/SQLite instance; it does not provide distributed storage or external identity/email/shipping services.
+
+### Admin design review
+
+```bash
+npm run build
+node scripts/export-preview.mjs review-pages/index.html
+node scripts/export-preview.mjs review-pages/admin-preview.html --admin
+node scripts/export-preview.mjs review-pages/admin.html --admin-login
+```
+
+Create `review-pages` first when exporting there. The existing manual Pages workflow performs these commands automatically. The public **`admin-preview.html`** explicitly opens a read-only sample workspace without accepting credentials. It supports navigation, filters, details and responsive content previews, while writes/uploads/invitations remain disabled. The static **`admin.html`** shows the real login design and accurately refuses sign-in without a Node backend. Neither export is a production authentication deployment or a route to live records. Shared JS modules, fonts, approved images and licenses are embedded; no backend/asset requests are needed for the read-only review.
+
+The 29-test backend suite now includes authentication, authorization, unique/expiring invitations, final-owner protection, deactivation, profile/password changes, validated uploads, variants/SKUs, stock history, atomic/idempotent orders, payment boundaries and content publication. Browser review includes all screens, native dialog focus, mobile navigation, and growing hero-copy previews at 320/360/390/430/768/1024/1440px.
