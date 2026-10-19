@@ -22,5 +22,13 @@ export default defineConfig({
   build: {
     rolldownOptions: { input: { main: 'index.html', admin: 'admin.html' } },
   },
-  server: { proxy: { '/api': 'http://127.0.0.1:3001' } },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:3001',
+        // Preserve the browser origin for the backend's same-origin checks.
+        changeOrigin: false,
+      },
+    },
+  },
 })
