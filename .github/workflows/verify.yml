@@ -13,6 +13,8 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version-file: .nvmrc
+          # scripts/pnpm.sh bootstraps the pinned pnpm version during setup.
+          package-manager-cache: false
       - name: Prepare the portable environment
         run: make setup
       - name: Backend, contract and TypeScript
