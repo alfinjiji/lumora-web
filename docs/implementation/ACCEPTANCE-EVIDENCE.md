@@ -1,10 +1,11 @@
-# Local acceptance evidence
+# Acceptance evidence
 
 Measured in this managed cloud workspace on 2026-10-20. Source is on feat/auraflare-production-rebuild. The historical application remains recoverable from backup-before-fresh-start-2026-10-19; legacy private data is separately protected outside the checkout. No legacy data was imported.
 
 | Check | Recorded result |
 |---|---|
 | Portable setup | scripts/setup.sh completed, including a repeat run: frozen pnpm/Composer install, migrations, empty-catalogue seeder, supervised API/worker/scheduler, MySQL/Redis/mail capture and configuration check |
+| Hosted CI | [GitHub Actions run 39387436895](https://github.com/alfinjiji/lumora-web/actions/runs/39387436895) passed on a clean Ubuntu runner for application commit `3279a0453c144534edbc76f823b227eb3b81aec7`: portable setup, backend/contract/TypeScript, lint/format/static analysis, production Next.js build, nine browser journeys and generated-client consistency. Automatic setup-node package-manager caching is disabled because the pinned pnpm is installed by the project helper during setup. |
 | Backend | **53 tests, 425 assertions passed** against guarded MySQL auraflare_test; no skipped tests |
 | Real races | Five fork/barrier scenarios with separate MySQL connections: last-unit reservation, inventory adjustment, final owner, callback/webhook settlement and expiry versus settlement |
 | Additional business/security cases | Unknown create reconciliation without second create; authorization/failure/capture ordering; duplicate/excess/late captures; receipt-based refund; independent manual verification; session/email hold caps and intake rate limit; recovery/guest token replay, verified claim and direct-order ownership; account boundaries; media/content/enquiry/resource tests |
@@ -22,4 +23,4 @@ Measured in this managed cloud workspace on 2026-10-20. Source is on feat/aurafl
 | Actual default database | Zero products, zero owner/staff memberships, checkout disabled; synthetic users/catalogue/orders remain in separate test schemas |
 | Performance | Two final cold/throttled mobile samples: LCP 3.984s and 3.944s, CLS 0.000291, 691,155 transfer bytes. See PERFORMANCE.md for baseline, budgets and limits. |
 
-CI workflow is supplied and its constituent local commands were exercised. No hosted GitHub Actions run, public hosting, real DNS/HTTPS ingress, live/test Razorpay account, external mail provider, real S3 IAM, deployed ClamAV, physical-phone performance or offsite disaster recovery has been independently qualified. These are explicit launch gates rather than claims established by fake/emulator checks.
+Hosted CI and the constituent local commands passed. Public hosting, real DNS/HTTPS ingress, live/test Razorpay account, external mail provider, real S3 IAM, deployed ClamAV, physical-phone performance and offsite disaster recovery have not been independently qualified. These remain explicit launch gates rather than claims established by fake/emulator checks.
