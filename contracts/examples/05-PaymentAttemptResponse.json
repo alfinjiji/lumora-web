@@ -1,0 +1,11 @@
+{
+  "data": {
+    "id": "01K7XBDPPY1PBM3MN3W1M6ZCG2",
+    "method": "razorpay",
+    "status": "created",
+    "amount_minor": 128000,
+    "currency": "INR",
+    "provider_order_id": "order_example",
+    "public_key_id": "rzp_test_example"
+  }
+}

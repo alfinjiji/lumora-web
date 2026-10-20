@@ -1,0 +1,99 @@
+name: auraflare
+x-api: &api
+  image: auraflare-php:8.5
+  user: "${AURAFLARE_UID:-1000}:${AURAFLARE_GID:-1000}"
+  working_dir: /app
+  volumes:
+    - ./apps/api:/app
+    - ./.local/ca.pem:/run/ca.pem:ro
+  env_file: .env
+  environment:
+    DB_HOST: mysql
+    REDIS_HOST: redis
+    RAZORPAY_MODE: ${RAZORPAY_MODE:-disabled}
+    RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-}
+    RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-}
+    RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET:-}
+    NO_PROXY: ${NO_PROXY:-localhost,127.0.0.1},mysql,redis,api,edge,web,mailpit,s3-emulator
+    AURAFLARE_CA_BUNDLE: /run/ca.pem
+    COMPOSER_HOME: /tmp/auraflare-composer
+    COMPOSER_CAFILE: /run/ca.pem
+    SSL_CERT_FILE: /run/ca.pem
+  depends_on:
+    mysql: {condition: service_healthy}
+    redis: {condition: service_healthy}
+services:
+  mysql:
+    image: mysql:8.4.8@sha256:2952e3be7807f06fc18de50b3ea1a632d5c70d63482ff7d7376fe3aa8999babf
+    environment:
+      MYSQL_DATABASE: auraflare
+      MYSQL_USER: auraflare
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Run make setup first}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Run make setup first}
+    volumes: [mysql-data:/var/lib/mysql]
+    ports: ["127.0.0.1:3307:3306"]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
+      interval: 3s
+      timeout: 3s
+      retries: 40
+  redis:
+    image: redis:8.2.4-alpine@sha256:a308ca111032fa8f306a2dc7be7ba5deb8b777ed5d258c733cddba48a1fd7904
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes: [redis-data:/data]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      retries: 20
+  mailpit:
+    image: axllent/mailpit:v1.27.10@sha256:b1f1be18af530d939a11ee8820b379e0c88eeec204d904bfad68862adced3a5a
+    ports: ["127.0.0.1:8025:8025"]
+  s3-emulator:
+    image: motoserver/moto:5.1.17@sha256:0361ac8f0cc6687dcf3835da1d60e31cf457fb0d49229d56586f2aa5c510f170
+    profiles: [storage-test]
+    environment: {MOTO_PORT: "5000"}
+  api:
+    <<: *api
+    command: ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+    ports: ["127.0.0.1:8000:8000"]
+  browser-api:
+    <<: *api
+    profiles: [browser]
+    environment:
+      DB_HOST: mysql
+      REDIS_HOST: redis
+      APP_ENV: testing
+      DB_DATABASE: auraflare_browser
+      FILESYSTEM_DISK: local
+      MEDIA_PUBLIC_DISK: public
+      MEDIA_PRIVATE_DISK: local
+      APP_DEBUG: "false"
+      SESSION_COOKIE: auraflare_browser_session
+      REDIS_PREFIX: auraflare_browser_
+      CACHE_PREFIX: auraflare_browser_cache_
+      REDIS_QUEUE: auraflare_browser
+      RAZORPAY_MODE: disabled
+      RAZORPAY_KEY_ID: ""
+      RAZORPAY_KEY_SECRET: ""
+      RAZORPAY_WEBHOOK_SECRET: ""
+      EXTERNAL_MAIL_ENABLED: "false"
+      REQUIRE_BACKGROUND_HEALTH: "false"
+      APP_URL: http://127.0.0.1:5174
+      CHECKOUT_ENABLED: "true"
+      TAX_POLICY: none
+      MANUAL_PAYMENT_INSTRUCTIONS: "Synthetic fixture only. Do not send money."
+      MANUAL_PAYEE_NAME: Fixture
+      MANUAL_PAYMENT_DESTINATION: NOT-A-REAL-ACCOUNT
+    command: [php, artisan, serve, --host=0.0.0.0, --port=8000]
+    ports: ["127.0.0.1:8001:8000"]
+  worker:
+    <<: *api
+    command: ["php", "artisan", "queue:work", "--sleep=1", "--tries=5", "--timeout=90"]
+    restart: unless-stopped
+  scheduler:
+    <<: *api
+    command: ["php", "artisan", "schedule:work"]
+    restart: unless-stopped
+volumes:
+  mysql-data:
+  redis-data:

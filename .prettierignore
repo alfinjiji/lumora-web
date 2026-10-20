@@ -1,0 +1,10 @@
+node_modules
+apps/api
+contracts/openapi.yaml
+packages/api-client/src/schema.d.ts
+design-reference
+pnpm-lock.yaml
+.next*
+.local
+docs/specifications
+docs/implementation/PLAN.md

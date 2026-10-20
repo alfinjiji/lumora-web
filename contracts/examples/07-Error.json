@@ -1,0 +1,12 @@
+{
+  "error": {
+    "code": "INSUFFICIENT_STOCK",
+    "message": "One or more items are no longer available.",
+    "fields": {
+      "items.0.quantity": [
+        "Only 1 unit is currently available."
+      ]
+    }
+  },
+  "request_id": "request-example-001"
+}

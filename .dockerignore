@@ -1,0 +1,15 @@
+.git
+node_modules
+**/node_modules
+**/vendor
+**/.next
+.data
+.env*
+apps/api/storage
+
+**/.next*
+.local
+**/storage
+**/bootstrap/cache/*.php
+**/.env*
+design-reference

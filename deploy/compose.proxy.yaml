@@ -1,0 +1,11 @@
+# Optional override for release containers behind a managed TLS-intercepting proxy.
+services:
+  api:
+    environment: {AURAFLARE_CA_BUNDLE: /run/ca.pem}
+    volumes: [./.local/ca.pem:/run/ca.pem:ro]
+  worker:
+    environment: {AURAFLARE_CA_BUNDLE: /run/ca.pem}
+    volumes: [./.local/ca.pem:/run/ca.pem:ro]
+  scheduler:
+    environment: {AURAFLARE_CA_BUNDLE: /run/ca.pem}
+    volumes: [./.local/ca.pem:/run/ca.pem:ro]

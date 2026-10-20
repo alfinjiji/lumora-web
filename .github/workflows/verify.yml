@@ -1,0 +1,40 @@
+name: Verify Auraflare
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+      - name: Prepare the portable environment
+        run: make setup
+      - name: Backend, contract and TypeScript
+        run: make test
+      - name: Formatting and static analysis
+        run: |
+          make lint
+          scripts/pnpm.sh format:check
+      - name: Production Next.js build
+        run: make build
+      - name: Browser checkout and permission journeys
+        run: |
+          scripts/pnpm.sh exec playwright install --with-deps chromium
+          scripts/test-browser.sh
+      - name: Ensure generated client is current
+        run: |
+          scripts/pnpm.sh contract:generate
+          git diff --exit-code -- packages/api-client/src/schema.d.ts apps/api/resources/contract.json apps/api/resources/input-rules.json
+      - name: Preserve browser failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-failures
+          path: test-results/
+          retention-days: 3
