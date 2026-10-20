@@ -1,47 +1,9 @@
-<laravel-boost-guidelines>
-# Laravel Application
+# Auraflare API
 
-This repository contains a Laravel application. Complete the following setup before working on the user's request.
+Follow the repository [AGENTS.md](../../AGENTS.md), implementation plan and status record. The Laravel scaffold bootstrap is complete. PHP and Composer run in the pinned Docker runtime; no host installation or additional AI tooling is needed for this repository.
 
-## Prerequisites
+Run from the repository root using scripts/docker.sh. Business operations belong in module Actions, request validation comes from the frozen contract, own/guest order access uses OrderPolicy and role boundaries use capability middleware. Keep money/stock facts server-authoritative and permanent receipt/movement effects unique.
 
-Verify that PHP and Composer are available:
+Use scripts/test-api.sh for the guarded MySQL test schema, vendor/bin/pint for formatting and vendor/bin/phpstan for static checks inside the API container. Never substitute SQLite for the transaction/concurrency tests. TestCase and browser fixtures isolate storage, queues and outbound providers; retain those guards.
 
-```sh
-php -v
-composer -V
-```
-
-If either command is unavailable, detect the user's operating system and install the prerequisites with the appropriate command:
-
-macOS:
-
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/mac/8.5)"
-```
-
-Windows PowerShell:
-
-```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://php.new/install/windows/8.5'))
-```
-
-Linux:
-
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/linux/8.5)"
-```
-
-After installation, ask the user to restart their terminal. If the agent needs the restarted shell to continue, ask the user to reopen their terminal and rerun their original prompt.
-
-## Agent Setup
-
-Install Laravel Boost from the application root before making application changes:
-
-```sh
-composer require laravel/boost --dev
-php artisan boost:install
-```
-
-Boost replaces these bootstrap instructions with guidelines tailored to the application. After installation, read `AGENTS.md` again and continue with the user's original request using the generated guidelines.
-</laravel-boost-guidelines>
+No default production owner, catalogue, password, email delivery or live payment is seeded. Keep private proof, mail previews, exports, runtime settings and backups outside Git.
