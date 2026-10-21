@@ -1,0 +1,9 @@
+extends:
+  - minimal
+rules:
+  no-server-example.com: off
+  info-license: off
+  operation-4xx-response: off
+  operation-summary: error
+  operation-operationId: error
+  no-unused-components: warn

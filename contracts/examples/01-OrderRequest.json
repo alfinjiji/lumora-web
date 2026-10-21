@@ -1,0 +1,19 @@
+{
+  "cart_id": "01K7XAPV8D94Q3JGXJNAFQ1AJC",
+  "expected_cart_version": 4,
+  "contact": {
+    "name": "Example Customer",
+    "email": "customer@example.test",
+    "phone": "+919000000000"
+  },
+  "address": {
+    "line1": "Example address",
+    "line2": "",
+    "city": "Kannur",
+    "state_code": "KL",
+    "postcode": "670001",
+    "country_code": "IN"
+  },
+  "customer_note": "Please contact before delivery.",
+  "accept_terms": true
+}

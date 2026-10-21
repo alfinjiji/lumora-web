@@ -1,0 +1,75 @@
+# Private release reference: use an owned HTTPS ingress before production use.
+name: auraflare-release
+x-api: &api
+  image: auraflare-api:production
+  env_file: .env
+  environment:
+    APP_ENV: production
+    APP_DEBUG: "false"
+    SESSION_SECURE_COOKIE: "true"
+    SESSION_DOMAIN: ""
+    REQUIRE_BACKGROUND_HEALTH: "true"
+    CHECKOUT_ENABLED: ${CHECKOUT_ENABLED:-false}
+    BUSINESS_CONFIG_APPROVED: ${BUSINESS_CONFIG_APPROVED:-false}
+    DB_HOST: mysql
+    REDIS_HOST: redis
+    RAZORPAY_MODE: ${RAZORPAY_MODE:-disabled}
+    RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-}
+    RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-}
+    RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET:-}
+    NO_PROXY: ${NO_PROXY:-localhost,127.0.0.1},mysql,redis,api,edge,web,mailpit
+  volumes: [release-media:/app/storage/app]
+  restart: unless-stopped
+  depends_on:
+    mysql: {condition: service_healthy}
+    redis: {condition: service_healthy}
+services:
+  edge:
+    image: nginxinc/nginx-unprivileged:1.28-alpine@sha256:7377697a821c131a924a7105fafbe7414db4e9fcc77a6f08f776f33f141ec3f8
+    ports: ["127.0.0.1:8080:8080"]
+    environment:
+      FASTCGI_HTTPS: "${FASTCGI_HTTPS:-on}"
+      TRUSTED_INGRESS_CIDR: "${TRUSTED_INGRESS_CIDR:-127.0.0.1/32}"
+    volumes: [./deploy/nginx.conf:/etc/nginx/templates/default.conf.template:ro]
+    depends_on: [api, web]
+    restart: unless-stopped
+  web:
+    image: auraflare-web:production
+    environment:
+      API_INTERNAL_URL: http://edge:8080
+      PUBLIC_SITE_URL: ${APP_URL}
+    restart: unless-stopped
+  api:
+    <<: *api
+  worker:
+    <<: *api
+    command: [php, artisan, queue:work, --sleep=1, --tries=5, --timeout=90]
+  scheduler:
+    <<: *api
+    command: [php, artisan, schedule:work]
+  mysql:
+    image: mysql:8.4.8@sha256:2952e3be7807f06fc18de50b3ea1a632d5c70d63482ff7d7376fe3aa8999babf
+    environment:
+      MYSQL_DATABASE: auraflare
+      MYSQL_USER: auraflare
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes: [release-db:/var/lib/mysql]
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, mysqladmin, ping, -h, 127.0.0.1, --silent]
+      interval: 3s
+      retries: 40
+  redis:
+    image: redis:8.2.4-alpine@sha256:a308ca111032fa8f306a2dc7be7ba5deb8b777ed5d258c733cddba48a1fd7904
+    command: [redis-server, --appendonly, "yes"]
+    volumes: [release-redis:/data]
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 3s
+      retries: 20
+volumes:
+  release-db:
+  release-media:
+  release-redis:

@@ -1,0 +1,563 @@
+@font-face {
+  font-family: "Cormorant Garamond";
+  src: url("/fonts/cormorant-garamond.woff2");
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0251, U+0259, U+0261, U+0268, U+0289, U+02BB-02BC, U+02BE-02BF,
+    U+02C6-02C8, U+02CA-02CC, U+02D8-02DD, U+0300-0304, U+0306-030D, U+030F,
+    U+0311, U+031B, U+0323-0324, U+0326-0328, U+032D-032E, U+0331, U+034F,
+    U+0358, U+0394, U+03A9, U+03BC, U+03C0, U+0400-045F, U+0462-0463,
+    U+046A-046B, U+0472-0475, U+048A-04A5, U+04A8-04FF, U+0510-0513,
+    U+051A-051D, U+0524-0529, U+052E-052F, U+0E3F, U+1DB0, U+1E0C-1E0F,
+    U+1E20-1E21, U+1E24-1E25, U+1E2A-1E2B, U+1E30-1E31, U+1E36-1E3B,
+    U+1E3E-1E4B, U+1E5A-1E63, U+1E6C-1E6F, U+1E80-1E85, U+1E8E-1E8F,
+    U+1E92-1E93, U+1E97, U+1E9E, U+1EA0-1EF9, U+2070, U+2074-207A, U+207D-2089,
+    U+208D-208E, U+2113, U+2116-2117, U+2120, U+2122, U+212E, U+215B-215E,
+    U+2202, U+2205, U+220F, U+2211-2212, U+221A, U+221E, U+222B, U+2248, U+2260,
+    U+2264-2265, U+2B1B-2B1C, U+3000, U+A729, U+A78B-A78C, U+FFF9-FFFB;
+}
+@font-face {
+  font-family: "Cormorant Garamond";
+  src: url("/fonts/cormorant-garamond-latin.woff2");
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0020-007E, U+00A0-00B4, U+00B6-017F, U+018F, U+0192, U+0197, U+01A0-01A1,
+    U+01AF-01B0, U+01CD-01DC, U+01E2-01E3, U+01E6-01EB, U+01F8-021B,
+    U+0232-0233, U+0237, U+0244, U+2000-200D, U+2010-2015, U+2018-201A,
+    U+201C-201E, U+2020-2022, U+2026-2029, U+202F-2030, U+2032-2033,
+    U+2039-203A, U+2042-2044, U+205F-2060, U+2063, U+20A1, U+20A4, U+20A6-20A7,
+    U+20AA-20AC, U+20AE, U+20B1-20B2, U+20B4-20B5, U+20B8-20BA, U+20BD,
+    U+2190-2199, U+25A0-25A1, U+25B2-25B3, U+25B6-25B7, U+25BC-25BD,
+    U+25C0-25C1, U+25C6-25C7, U+25CA-25CB, U+25CF, U+25E6, U+25FB-25FC, U+261C,
+    U+261E, U+263A, U+2766, U+FEFF;
+}
+@font-face {
+  font-family: "Cormorant Garamond";
+  src: url("/fonts/cormorant-garamond-italic.woff2");
+  font-weight: 300 700;
+  font-style: italic;
+  font-display: swap;
+  unicode-range:
+    U+0251, U+0259, U+0261, U+0268, U+0289, U+02BB-02BC, U+02BE-02BF,
+    U+02C6-02C7, U+02CA-02CB, U+02D8-02DD, U+0300-0304, U+0306-030D, U+030F,
+    U+0311, U+031B, U+0323-0324, U+0326-0328, U+032D-032E, U+0331, U+034F,
+    U+0358, U+0394, U+03A9, U+03BC, U+03C0, U+0400-045F, U+0462-0463,
+    U+046A-046B, U+0472-0475, U+048A-04A5, U+04A8-04FF, U+0510-0513,
+    U+051A-051D, U+0524-0529, U+052E-052F, U+0E3F, U+1E0C-1E0F, U+1E20-1E21,
+    U+1E24-1E25, U+1E2A-1E2B, U+1E30-1E31, U+1E36-1E3B, U+1E3E-1E4B,
+    U+1E5A-1E63, U+1E6C-1E6F, U+1E80-1E85, U+1E8E-1E8F, U+1E92-1E93, U+1E97,
+    U+1E9E, U+1EA0-1EF9, U+2070, U+2074-207A, U+207D-2089, U+208D-208E, U+2113,
+    U+2116-2117, U+2120, U+2122, U+212E, U+215B-215E, U+2202, U+2205, U+220F,
+    U+2211-2212, U+221A, U+221E, U+222B, U+2248, U+2260, U+2264-2265,
+    U+2B1B-2B1C, U+3000, U+A729, U+A78B-A78C, U+FB00-FB06, U+FFF9-FFFB;
+}
+@font-face {
+  font-family: "Cormorant Garamond";
+  src: url("/fonts/cormorant-garamond-italic-latin.woff2");
+  font-weight: 300 700;
+  font-style: italic;
+  font-display: swap;
+  unicode-range:
+    U+0000, U+000D, U+0020-007E, U+00A0-00B4, U+00B6-017F, U+018F, U+0192,
+    U+0197, U+01A0-01A1, U+01AF-01B0, U+01CD-01DC, U+01E2-01E3, U+01E6-01EB,
+    U+01F8-021B, U+0232-0233, U+0237, U+0244, U+2000-200D, U+2010-2014,
+    U+2018-201A, U+201C-201E, U+2020-2022, U+2026-2029, U+202F-2030,
+    U+2032-2033, U+2039-203A, U+2042-2044, U+205F-2060, U+2063, U+20A1, U+20A4,
+    U+20A6-20A7, U+20AA-20AC, U+20AE, U+20B1-20B2, U+20B4-20B5, U+20B8-20BA,
+    U+20BD, U+2190-2199, U+25A0-25A1, U+25B2-25B3, U+25B6-25B7, U+25BC-25BD,
+    U+25C0-25C1, U+25C6-25C7, U+25CA-25CB, U+25CF, U+25E6, U+25FB-25FC, U+261C,
+    U+261E, U+263A, U+2766, U+FEFF;
+}
+@font-face {
+  font-family: "DM Sans";
+  src: url("/fonts/dm-sans.ttf");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0259, U+02C6-02C7, U+02D8-02DD, U+0300-0304, U+0306-0308, U+030A-030C,
+    U+0312, U+0326-0328, U+03C0, U+1E80-1E85, U+1E9E, U+1EBC-1EBD, U+1EF2-1EF3,
+    U+1EF8-1EF9, U+2074, U+2113, U+2122, U+2126, U+212E, U+2202, U+2206, U+220F,
+    U+2211-2212, U+2215, U+221A, U+221E, U+222B, U+2248, U+2260, U+2264-2265,
+    U+FB01-FB02;
+}
+@font-face {
+  font-family: "DM Sans";
+  src: url("/fonts/dm-sans-latin.woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+000D, U+0020-007E, U+00A0-00AC, U+00AE-0107, U+010A-011B, U+011E-0123,
+    U+0126-0133, U+0136-0137, U+0139-0148, U+014A-015B, U+015E-0165,
+    U+0168-017E, U+018F, U+0192, U+01FC-01FD, U+0218-021B, U+0237, U+2013-2014,
+    U+2018-201A, U+201C-201E, U+2020-2022, U+2026, U+2030, U+2039-203A, U+2044,
+    U+20A8, U+20AC, U+20B9-20BA, U+20BD, U+2190-2199, U+25CA;
+}
+:root {
+  --serif: "Cormorant Garamond", Georgia, serif;
+}
+body {
+  overflow-wrap: break-word;
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+input,
+select,
+textarea {
+  max-width: 100%;
+  min-width: 0;
+}
+a,
+button,
+label {
+  touch-action: manipulation;
+}
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  grid-column: 1/-1;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+}
+.empty-state h3 {
+  font: 36px var(--serif);
+}
+.form-feedback {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.app-section {
+  max-width: 1100px;
+  margin: auto;
+  padding: 60px 6%;
+  min-height: 65vh;
+}
+.app-section h1 {
+  font-size: clamp(38px, 6vw, 70px);
+  letter-spacing: -1px;
+}
+.app-section h2 {
+  font-size: 32px;
+}
+.app-section .form {
+  display: grid;
+  gap: 16px;
+  max-width: 620px;
+  margin-top: 30px;
+}
+.field-row {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+}
+.field-row label {
+  font-size: 12px;
+}
+.field-row .field {
+  padding: 12px;
+  border: 1px solid #d3c3c6;
+  border-radius: 6px;
+  background: #fffdfa;
+  color: #30151e;
+  min-width: 0;
+  width: 100%;
+}
+.field-row small {
+  font-size: 11px;
+  line-height: 1.7;
+  color: #7a6268;
+}
+.inline-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 20px 0;
+}
+.notice {
+  padding: 16px;
+  border: 1px solid #d7c3b1;
+  background: #f0e5dc;
+  border-radius: 8px;
+  line-height: 1.8;
+  margin: 15px 0;
+}
+.order-card {
+  padding: 25px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  margin: 20px 0;
+}
+.order-breakdown {
+  display: grid;
+  gap: 12px;
+}
+.order-breakdown > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+.order-breakdown dd {
+  margin: 0;
+}
+.app-section .order-card h2 {
+  margin: 0 0 20px;
+}
+.auth-links {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  margin-top: 25px;
+}
+.admin-app .nav {
+  display: block;
+}
+.admin-app .nav a {
+  display: flex;
+  gap: 11px;
+  align-items: center;
+  padding: 13px 17px;
+  font-size: 12px;
+  color: #d3bfc5;
+  border-radius: 5px;
+}
+.admin-app .nav a.active {
+  background: #ffffff13;
+  color: #fff7ea;
+}
+.admin-app .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: #f7f5f1;
+}
+.admin-app .page-heading h1 {
+  margin: 8px 0;
+}
+.admin-app .page h2 {
+  margin: 0 0 14px;
+}
+.admin-app .card-body {
+  padding: 24px;
+}
+.admin-app .form {
+  display: grid;
+  gap: 14px;
+}
+.admin-app .form label {
+  margin: 0;
+}
+.admin-app .form .field {
+  font-size: 13px;
+}
+.admin-app .page .notice {
+  font-size: 12px;
+}
+.admin-app .table-scroll {
+  overflow: auto;
+  max-width: 100%;
+}
+.admin-app .table-scroll table {
+  min-width: 650px;
+}
+.admin-app .table-scroll td {
+  max-width: 280px;
+  overflow-wrap: anywhere;
+}
+.admin-app .detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+.admin-app .drawer h2 {
+  font: 32px var(--serif);
+  margin: 15px 0;
+}
+.admin-app .drawer .form {
+  margin-top: 25px;
+}
+.admin-app .product-card .art {
+  overflow: hidden;
+  aspect-ratio: 4/4.5;
+  height: auto;
+}
+.admin-app .product-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.admin-app .catalogue .product-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fffdfa;
+}
+.admin-app .product-info {
+  display: block;
+}
+.admin-app .product-info h2 {
+  font-size: 26px;
+}
+.admin-app .hero-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+.admin-app .mobile-menu {
+  min-height: 40px;
+  min-width: 40px;
+}
+.admin-app .hero-preview > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.admin-app .preview-cta {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.admin-app .login-art img {
+  width: 75%;
+  max-width: 330px;
+  border-radius: 180px 180px 20px 20px;
+  aspect-ratio: 4/5;
+  object-fit: cover;
+}
+.admin-app .login-form .field-row {
+  margin-top: 18px;
+}
+.admin-app .login-form input {
+  margin: 0;
+}
+.admin-app .login-form .button {
+  margin-top: 12px;
+}
+.admin-app .main {
+  min-width: 0;
+}
+.admin-app .permission {
+  line-height: 1.9;
+}
+.status-chip {
+  text-transform: capitalize;
+  border: 1px solid #dfd5cd;
+  background: #f1ebe4;
+  border-radius: 20px;
+  padding: 5px 9px;
+  font-size: 10px;
+  display: inline-block;
+}
+.scroll-safe {
+  overflow: auto;
+}
+.admin-app .topbar .crumb {
+  flex: 1;
+}
+.inline-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+.product-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 45px;
+}
+.product-page > img {
+  width: 100%;
+  border-radius: 24px;
+  aspect-ratio: 4/5;
+  object-fit: cover;
+}
+.account-nav {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 30px;
+}
+.cart-list {
+  display: grid;
+  gap: 20px;
+}
+.cart-line {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 15px;
+  border-bottom: 1px solid var(--line);
+  padding: 15px 0;
+}
+.cart-line input {
+  width: 70px;
+}
+.bag a {
+  font-size: 12px;
+}
+.account-shortcut {
+  font-size: 11px;
+}
+.intro-letters span {
+  display: inline-block;
+  animation: brand-settle 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--letter) * 45ms);
+}
+@keyframes brand-settle {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.intro-quote span {
+  animation: quote-visible 0.01s both;
+  animation-delay: calc(700ms + var(--letter) * 31ms);
+}
+@keyframes quote-visible {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.opening-overlay.intro-exit {
+  animation: intro-slide-away 0.85s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+}
+@keyframes intro-slide-away {
+  to {
+    transform: translate3d(0, -105%, 0);
+  }
+}
+@media (max-width: 900px) {
+  .admin-app .detail-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 650px) {
+  .app-section {
+    padding: 35px 20px;
+  }
+  .app-section h1 {
+    font-size: 42px;
+  }
+  .inline-fields,
+  .product-page {
+    grid-template-columns: 1fr;
+  }
+  .admin-app .form .field {
+    font-size: 16px;
+  }
+  .account-shortcut {
+    display: none;
+  }
+  .admin-app .hero-preview h2 {
+    overflow-wrap: anywhere;
+  }
+  .admin-app .page .inline-actions {
+    gap: 8px;
+  }
+  .admin-app .stat {
+    min-width: 0;
+  }
+  .admin-app .stat-value {
+    overflow-wrap: anywhere;
+    font-size: 24px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .opening-overlay {
+    display: none !important;
+  }
+  *,
+  *:before,
+  *:after {
+    scroll-behavior: auto !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@media (min-width: 901px) {
+  .admin-app .mobile-sidebar {
+    display: none;
+  }
+}
+@media (max-width: 900px) {
+  .admin-app .desktop-sidebar {
+    display: none;
+  }
+  .admin-app .main {
+    margin-left: 0;
+  }
+  .admin-app dialog.mobile-sidebar[open] {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    inset: 0 auto 0 0;
+    margin: 0;
+    width: 228px;
+    height: 100dvh;
+    max-height: 100dvh;
+    max-width: 90vw;
+    border: 0;
+    color: #f3e5d1;
+    padding: 30px 16px;
+    transform: none;
+    z-index: 30;
+  }
+  .admin-app .mobile-sidebar::backdrop {
+    background: #21191c88;
+  }
+  .admin-app .mobile-sidebar .close {
+    color: #f3e5d1;
+    right: 10px;
+    top: 10px;
+  }
+  .admin-app .mobile-menu {
+    display: block;
+  }
+}
+
+.shop-menu-toggle {
+  display: none;
+}
+.shop-mobile-menu {
+  background: var(--cream);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 40px 28px;
+  width: min(420px, 90vw);
+}
+.shop-mobile-menu nav {
+  display: flex !important;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 40px;
+}
+.shop-mobile-menu .brand {
+  font-size: 32px;
+}
+@media (max-width: 760px) {
+  .shop-menu-toggle {
+    display: block;
+    background: none;
+    border: 0;
+    margin-left: auto;
+    font-size: 22px;
+  }
+  .bag {
+    margin-left: 12px !important;
+  }
+}
